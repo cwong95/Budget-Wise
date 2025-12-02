@@ -1,7 +1,21 @@
-/* 
-Import data functions from various files and export them for use in other parts of the application.
-This file serves as a central index for all data-related operations.
-*/
+import { Router } from "express";
+import budgetRoutes from "./budgetRoutes.js";
+import authRoutes from "./authRoutes.js";
+import historyRoutes from "./historyRoutes.js";
+
+const router = Router();
+
+// Public home page.
+router.use("/", budgetRoutes);
+
+// Auth routes: /signup, /login, /logout.
+router.use("/", authRoutes);
+
+// Authenticated views like bill history.
+router.use("/", historyRoutes);
+
+export default router;
+
 //import * as usersDataFunctions from './users.js';
 //import * as utilitiesDataFunctions from './utilities.js';
 //import * as billsDataFunctions from './bills.js';
