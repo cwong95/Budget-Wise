@@ -5,7 +5,8 @@ BudgetWise is a full-stack budgeting app that lets users record expenses, organi
 **Core Features**
 
 - **User Authentication:** Users create an account and securely login/logout.
-- **Dashboard:** Summary of all utilities, how many are paid, due, or upcoming. Allows the user to add a utility service with default due date, amount, and notes. Users can update bill details or edit the service defaults (due dates, amounts, etc.).
+- **Dashboard:** Summary of all utilities, how many are paid, due, or upcoming. Shows how much has been spent compared to each user-defined budget. Allows the user to add a utility service with default due date, amount, and notes. Users can update bill details or edit the service defaults (due dates, amounts, etc.).
+- **Budget Management:** Set and manage specific spending limits by category (e.g. Food, Housing) and time period (start and end dates.) Create, view, and delete multiple category-specific budgets.
 - **Reminders:** Send reminders before due dates and on the due date.
 - **Add/Edit/Delete Transactions:** Record income or expense transactions (title, amount, category, date).
 - **History & Search:** Show prior months' bills with filters for quick lookups. Search by provider, account number, or tags. Filter by month and status.
