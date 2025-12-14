@@ -47,12 +47,87 @@
 
 <hr>
 
-<h2>Upcomining Bills & Utilities </h2>
+<h2>📌 Upcoming Bills & Utilities</h2>
 {{#if utilitySummary}}
-    <section class="utility-summary-card">
-        <p>Utility data will be displayed here, showing how many bills are paid, due, or upcoming.</p>
-    </section>
+  <section class="utility-summary-card">
+    <h3>Utility Bill Status Overview</h3>
+    <div class="utility-summary-stats">
+      <div class="summary-item">
+        <span class="status-badge status-paid">Paid</span>
+        <span class="summary-count">{{utilitySummary.paid}}</span>
+      </div>
+      <div class="summary-item">
+        <span class="status-badge status-due">Due Today</span>
+        <span class="summary-count">{{utilitySummary.due}}</span>
+      </div>
+      <div class="summary-item">
+        <span class="status-badge status-upcoming">Upcoming</span>
+        <span class="summary-count">{{utilitySummary.upcoming}}</span>
+      </div>
+      <div class="summary-item">
+        <span class="status-badge status-overdue">Overdue</span>
+        <span class="summary-count">{{utilitySummary.overdue}}</span>
+      </div>
+      <div class="summary-item total">
+        <strong>Total Bills:</strong> {{utilitySummary.total}}
+      </div>
+    </div>
+
+    <div class="utility-progress-bar">
+      <div
+        class="utility-progress-paid"
+        style="width: {{calcPercent utilitySummary.paid utilitySummary.total}}%;"
+        title="{{calcPercent utilitySummary.paid utilitySummary.total}}% Paid"
+      ></div>
+      <div
+        class="utility-progress-due"
+        style="width: {{calcPercent utilitySummary.due utilitySummary.total}}%;"
+        title="{{calcPercent utilitySummary.due utilitySummary.total}}% Due"
+      ></div>
+      <div
+        class="utility-progress-upcoming"
+        style="width: {{calcPercent utilitySummary.upcoming utilitySummary.total}}%;"
+        title="{{calcPercent utilitySummary.upcoming utilitySummary.total}}% Upcoming"
+      ></div>
+      <div
+        class="utility-progress-overdue"
+        style="width: {{calcPercent utilitySummary.overdue utilitySummary.total}}%;"
+        title="{{calcPercent utilitySummary.overdue utilitySummary.total}}% Overdue"
+      ></div>
+    </div>
+
+    <p class="utility-summary-note">
+      Track and manage all your utilities in one place. <a href="/utilities">Go to Utilities</a>
+    </p>
+  </section>
+{{else}}
+  <p>No utility bills found.</p>
 {{/if}}
+
+
+<hr>
+
+<hr>
+
+<h2>🔔 Reminders</h2>
+{{#if reminders.length}}
+  <section class="utility-summary-card">
+    <h3>Upcoming notifications</h3>
+    <ul class="reminders-inline">
+      {{#each reminders}}
+        <li>
+          {{#if (eq this.type "on")}}📅 Due today{{else}}⏳ Before due{{/if}} —
+          {{formatDate this.reminderDate}}
+          {{#if this.sent}} ✅{{else}} ⏳{{/if}}
+        </li>
+      {{/each}}
+    </ul>
+    <p><a href="/reminders">View all reminders</a></p>
+  </section>
+{{else}}
+  <p>No reminders scheduled yet.</p>
+{{/if}}
+
 
 
 </main>
