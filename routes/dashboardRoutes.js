@@ -1,12 +1,11 @@
+// routes/dashboard.js
 import { Router } from "express";
 import { budgetData, billsData, remindersData } from "../data/index.js";
 
 const router = Router();
 
 const ensureLoggedIn = (req, res, next) => {
-  if (!req.session || !req.session.user) {
-    return res.redirect("/login");
-  }
+  if (!req.session || !req.session.user) return res.redirect("/login");
   next();
 };
 
@@ -30,21 +29,22 @@ router.get("/", ensureLoggedIn, async (req, res) => {
       total: bills.length,
     };
 
-    // 👇 Hook: fetch reminders for this user
-    const reminders = await remindersData.getRemindersForUser(userId, { sent: false });
+    // In-app reminders: due now and not yet sent
+    const dueReminders =
+      (await remindersData.getDueRemindersForUserWithDetails(userId)) || [];
 
-    // Render dashboard with all data
+
     res.render("dashboard", {
       title: "BudgetWise Dashboard",
       budgetSummaries,
       utilitySummary,
-      reminders
+      reminders: dueReminders, // pass to template
     });
   } catch (error) {
     res.status(500).render("dashboard", {
       title: "BudgetWise Dashboard",
       budgetSummaries: [],
-      error: error.message || "Unable to load dashboard data."
+      error: error.message || "Unable to load dashboard data.",
     });
   }
 });

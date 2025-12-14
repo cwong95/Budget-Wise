@@ -12,9 +12,6 @@ import utilitiesRoutes from "./routes/utilitiesRoutes.js";
 import billsRoutes from "./routes/billRoutes.js";
 import transactionsRoutes from "./routes/transactions.js";
 
-
-import { startReminderScheduler } from "./jobs/reminderScheduler.js";
-
 const app = express();
 const PORT = 3000;
 
@@ -40,7 +37,6 @@ const hbs = exphbs.create({
 app.engine("handlebars", hbs.engine);
 app.set("view engine", "handlebars");
 
-startReminderScheduler();
 
 const rewriteUnsupportedBrowserMethods = (req, res, next) => {
   if (req.body && req.body._method) {

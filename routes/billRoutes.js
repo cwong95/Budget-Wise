@@ -17,13 +17,11 @@ router.get("/", ensureLoggedIn, async (req, res) => {
     const bills = await billsData.getBillsForUser(userId);
     res.render("bills/list", { title: "My Bills", bills });
   } catch (err) {
-    res
-      .status(500)
-      .render("bills/list", {
-        title: "My Bills",
-        bills: [],
-        error: err.message,
-      });
+    res.status(500).render("bills/list", {
+      title: "My Bills",
+      bills: [],
+      error: err.message,
+    });
   }
 });
 
@@ -107,7 +105,7 @@ router.post("/from-utility/:utilityId", ensureLoggedIn, async (req, res) => {
 
     res.redirect(`/utilities/${utilityId}/bills`);
   } catch (err) {
-    res.status(400).render("utilities/index", {
+    res.status(400).render("utilities", {
       title: "Utilities",
       utilities: [],
       error: "⚠️ Could not create bill: " + err.message,

@@ -277,3 +277,18 @@ hr {
   color: #455a64;
   margin-top: 0.5rem;
 }
+
+.inapp-reminders {
+  padding: 0.75rem 1rem;
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  border-radius: 8px;
+  margin: 1rem 0;
+}
+.reminders-inline {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+  display: grid;
+  gap: 6px;
+}
