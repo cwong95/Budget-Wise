@@ -6,7 +6,7 @@
 
     {{#if error}}
     <section class="error-section">
-        <p class="error-message">🛑{{error}}</p>
+        <p class="error-message">🛑 {{error}}</p>
     </section>
     {{/if}}
 
@@ -15,44 +15,42 @@
     <h2>📊Budget Tracking Summaries</h2>
     <p>Track your spending against your goals. <a href="/budgets">Manage Budgets</a></p>
 
-    {{#if budgetSummaries}}
+    {{#if budgetSummaries.length}}
         <section class="budget-tracking-list">
             {{#each budgetSummaries}}
                 <div class="budget-card">
                     <h3>{{this.category}} Budget ({{formatDate this.startDate}} - {{formatDate this.endDate}})</h3>
 
                     <div class="tracking-stats">
-                        <p><strong>Limit:</strong> ${{formatMoney this.amountLimit}}</p>
-                        <p><strong>Spent:</strong> ${{formatMoney this.amountUsed}}</p>
-                        <p><strong>Remaining:</strong> ${{formatMoney this.amountRemaining}}</p>
+                        <p><strong>Limit:</strong> ${{this.amountLimitFormatted}}</p>
+                        <p><strong>Spent:</strong> ${{this.amountUsedFormatted}}</p>
+                        <p><strong>Remaining:</strong> ${{this.amountRemainingFormatted}}</p>
                     </div>
 
                     <div class="progress-bar-container">
                         <div
                             class="progress-bar"
                             style="width: {{this.percentageUsed}}%;"
-                            title="{{formatMoney this.percentageUsed}}% Used"
+                            title="{{this.percentageUsedRounded}}% Used"
                         ></div>
                     </div>
 
                 <p class="percentage-used-text">
-                    {{formatMoney this.percentageUsed}}% of budget used
+                    {{this.percentageUsedRounded}}% of budget used
                 </p>
             </div>
         {{/each}}
     </section>
-{{else}}
+  {{else}}
     <p>You have no active budgets being tracked. Please <a href="/budgets">set one up</a>!</p>
-{{/if}}
+  {{/if}}
 
-<hr>
+  <hr>
 
-<h2>Upcomining Bills & Utilities </h2>
-{{#if utilitySummary}}
+  <h2>Upcoming Bills & Utilities </h2>
+  {{#if utilitySummary}}
     <section class="utility-summary-card">
         <p>Utility data will be displayed here, showing how many bills are paid, due, or upcoming.</p>
     </section>
-{{/if}}
-
-
+  {{/if}}
 </main>

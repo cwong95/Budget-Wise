@@ -20,8 +20,21 @@ router.get("/", ensureLoggedIn, async (req, res) => {
         
         const rawBudgets = await budgetData.getBudgetsForUser(userId);
 
+        //Show only active budgets
+        const activeBudgets = rawBudgets.filter(b => b.active === true);
+
         const budgetSummaries = await Promise.all(
-            rawBudgets.map(budgetData.calculateBudgetSummary)
+            activeBudgets.map(async (budget) => {
+                const summary = await budgetData.calculateBudgetSummary(budget);
+                
+                return {
+                    ...summary,
+                    amountLimitFormatted: Number(summary.amountLimit || 0).toFixed(2),
+                    amountUsedFormatted: Number(summary.amountUsed || 0).toFixed(2),
+                    amountRemainingFormatted: Number(summary.amountRemaining || 0).toFixed(2),
+                    percentageUsedRounded: Math.round(Number(summary.percentageUsed || 0))
+                };
+            })
         );
 
         // NR's feature for utilitySummary

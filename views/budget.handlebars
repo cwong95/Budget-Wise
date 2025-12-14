@@ -7,17 +7,23 @@
   </section>
 
   {{#if error}}
-  <section class="error-section">
-    <p class="error-message">{{error}}</p>
-  </section>
+    <section class="error-section">
+        <p class="error-message">{{error}}</p>
+    </section>
+  {{/if}}
+
+  {{#if message}}
+    <section class="success-section">
+        <p class="success-message">{{message}}</p>
+    </section>
   {{/if}}
 
   <hr>
 
- <h2>Create New Budget</h2>
-<section class="budget-form-section">
+  <section class="budget-form-section">
+     <h2>Create New Budget</h2>
+     
     <form method="POST" action="/budgets" class="budget-form">
-        
         <div class = "form-group">
             <label for="amountLimit">Budget Limit ($)</label>
 
@@ -58,34 +64,66 @@
 
 <hr>
 
-<h2>Existing Budgets ({{budgets.length}})</h2>
-{{#if budgets.length}}
-    <section class="current-budgets-list">
-        {{#each budgets}}
-            <div class="budget-card">
-                <h3>{{this.category}}</h3>
-                <p>
-                    <strong>Limit:</strong> ${{this.amountLimit}} <br>
-                    <strong>Period:</strong> {{this.startDate}} to {{this.endDate}}
-                </p>
+<section class="budget-list-section">
+  <h2>Existing Budgets ({{budgets.length}})</h2>
 
-                <form method="POST" action="/budgets/delete" class="delete-form">
-                    <input type="hidden" name="budgetId" value="{{this._id}}">
-                    <button type="submit" class="delete-button" onclick="return confirm('Delete {{this.category}} budget?')">
+    {{#if budgets.length}}
+        <section class="current-budgets-list">
+            {{#each budgets}}
+                <div class="budget-card">
+                    <h3>{{this.category}}</h3>
+                
+                    <p>
+                        <strong>Limit:</strong> ${{this.amountLimit}} <br>
+                        <strong>Period:</strong> 
+                        {{#if this.startDateFormatted}}
+                            {{this.startDateFormatted}} to {{this.endDateFormatted}}
+                        {{else}}
+                            {{this.startDate}} to {{this.endDate}}
+                        {{/if}}
+                    </p>
+
+                    <p>
+                        <strong>Status:</strong>
+                        {{#if this.active}}
+                            <span class="status-pill active">Active</span>
+                        {{else}}
+                            <span class="status-pill inactive">Inactive</span>
+                        {{/if}}
+                    </p>
+
+                    <div class="budget-actions">
+                      <form method="POST" action="/budgets/toggle/{{this._id}}" class="toggle-form">
+                        {{#if this.active}}
+                            <button type="submit" class="toggle-button">Deactivate</button>
+                        {{else}}
+                            <button type="submit" class="toggle-button">Activate</button>
+                        {{/if}}
+                    </form>
+
+                    <form method="POST" action="/budgets/delete" class="delete-form">
+                      <input type="hidden" name="budgetId" value="{{this._id}}">
+                      <button 
+                        type="submit" 
+                        class="delete-button" 
+                        onclick="return confirm('Delete {{this.category}} budget?')"
+                      >
                         Delete
                     </button>
-                </form>
-            </div>
-        {{/each}}
-    </section>
-{{else}}
+                  </form>
+                </div>
+              </div>
+          {{/each}}
+       </section>
+    {{else}}
     <p>You have no budgets set up yet.</p>
-    {{/if}}
+  {{/if}}
+  </section>
+  
+  <hr>
 
-    <hr>
-
-<section class="nav-section">
+  <section class="nav-section">
     <a href="/dashboard" class="back-link">&larr; Back to Dashboard</a>
-</section>
-
+   </section>
+ 
 </main>
