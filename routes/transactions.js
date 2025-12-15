@@ -11,9 +11,15 @@ router.get('/', async (req, res) => {
 
         const userId = req.session.user._id;
         const transactions = await transactionsData.getAllTransactions(userId);
-        res.render('transactions', { transactions });
+
+        const formattedTransactions = transactions.map((t) => ({
+            ...t,
+            dateFormatted: t.date ? new Date(t.date).toLocaleDateString('en-US') : ''
+        }));
+
+        res.render('transactions', { transactions: formattedTransactions });
     } catch (e) {
-        res.status(500).render('transactions', { error: e });
+        res.status(500).render('transactions', { error: e.message || String(e), transactions: [] });
     }
 });
 
@@ -45,9 +51,14 @@ router.post('/', async (req, res) => {
      
         }
 
+        const formattedTransactions = transactions.map((t) => ({
+            ...t,
+            dateFormatted: t.date ? new Date(t.date).toLocaleDateString('en-US') : ''
+        }));
+
         res.status(400).render('transactions', {
-            error: e,
-            transactions
+            error: e.message || String(e),
+            transactions : formattedTransactions
         });
     }
 });

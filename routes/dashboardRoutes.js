@@ -15,10 +15,23 @@ router.get("/", ensureLoggedIn, async (req, res) => {
   try {
     // Budgets
     const rawBudgets = await budgetData.getBudgetsForUser(userId);
-    const budgetSummaries = await Promise.all(
-      rawBudgets.map(budgetData.calculateBudgetSummary)
-    );
 
+    const activeBudgets = rawBudgets.filter((b) => b.active !== true);
+
+    //Show only active budgets
+    const budgetSummaries = await Promise.all(
+        activeBudgets.map(async (budget) => {
+            const summary = await budgetData.calculateBudgetSummary(budget);
+                
+            return {
+                ...summary,
+                amountLimitFormatted: Number(summary.amountLimit || 0).toFixed(2),
+                amountUsedFormatted: Number(summary.amountUsed || 0).toFixed(2),
+                amountRemainingFormatted: Number(summary.amountRemaining || 0).toFixed(2),
+                percentageUsedRounded: Math.round(Number(summary.percentageUsed || 0))
+            };
+        })
+    );
     // Bills summary
     const bills = await billsData.getBillsForUser(userId);
     const utilitySummary = {

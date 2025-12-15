@@ -20,6 +20,8 @@ main.dashboard-page {
     color: #455a64;
 }
 
+/*Divider*/
+
 hr {
     border: 0;
     height: 1px;
@@ -27,9 +29,7 @@ hr {
     margin: 2rem 0;
 }
 
-
-/*Budget Management Form*/
-
+/*Headings*/
 .budget-form-section h2,
 .budget-page h2 {
     font-size: 1.5rem;
@@ -37,6 +37,7 @@ hr {
     margin-bottom: 1.2rem;
 }
 
+/*Budget Management Form*/
 .budget-form {
     display: grid;
     grid-template-columns: repeat(2, 1fr); 
@@ -114,26 +115,74 @@ hr {
     font-weight: 600;
 }
 
-.delete-form {
-    margin-top: 15px;
-    text-align: right;
+.delete-form,
+.toggle-form {
+    margin: 0;
 }
+
+/*Status Pill*/
+.status-pill {
+    display: inline-block;
+    padding: 0.25rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #fff;
+}
+
+.status-pill.active{
+    background: #2e7d32;
+}
+
+.status-pill.inactive {
+    background: #c62828;
+}
+
+.budget-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.budget-actions button {
+    flex: 1 1 auto;
+    min-width: 110px;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.toggle-button {
+    border: 1px solid #1976d2;
+    background: #fff;
+    color: #1976d2;
+}
+
+.toggle-button:hover {
+    background: #1976d2;
+    color: #fff;
+}
+
+/*Delete button*/
 
 .delete-button {
     border: 1px solid #c62828;
     background: #fff;
     color: #c62828;
-    border-radius: 4px;
-    padding: 0.3rem 0.7rem;
-    font-size: 0.8rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
 }
 
 .delete-button:hover {
     background: #c62828;
     color: #fff;
 }
+
+
+/*Dashboard Layout*/
 
 .dashboard-content-grid {
     display: flex;
