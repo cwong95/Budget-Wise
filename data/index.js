@@ -9,4 +9,3 @@ export const billsData = billsDataFunctions;
 export const budgetData = budgetDataFunctions;
 export const utilitiesData = utilitiesDataFunctions;
 export const remindersData = remindersDataFunctions;
-

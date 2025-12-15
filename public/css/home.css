@@ -5,7 +5,7 @@ main.homepage {
   padding: 2rem;
   background: #fff;
   border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 /* Intro section */
@@ -87,5 +87,3 @@ main.homepage {
   text-decoration: underline;
   color: #1b5e20;
 }
-
-

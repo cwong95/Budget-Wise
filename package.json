@@ -5,7 +5,10 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node app.js"
+    "start": "node app.js",
+    "seed": "node scripts/db_seed.js",
+    "lint": "eslint . --ext .js --fix",
+    "format": "prettier --write \"**/*.js\" && echo \"To format .handlebars templates install a Handlebars Prettier plugin (see README)\""
   },
   "module": "node --trace-warnings",
   "type": "module",
@@ -27,5 +30,9 @@
     "express-handlebars": "^8.0.3",
     "express-session": "^1.18.2",
     "mongodb": "^7.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.47.0",
+    "prettier": "^2.8.8"
   }
 }

@@ -1,7 +1,7 @@
 // data/reminders.js
-import { ObjectId } from "mongodb";
-import { reminders as remindersCollectionFn } from "../config/mongoCollections.js";
-import { billsData, utilitiesData } from "./index.js";
+import { ObjectId } from 'mongodb';
+import { reminders as remindersCollectionFn } from '../config/mongoCollections.js';
+import { billsData, utilitiesData } from './index.js';
 
 export const createBillReminders = async (userId, bill, daysBefore = 3) => {
   const col = await remindersCollectionFn();
@@ -26,7 +26,7 @@ export const createBillReminders = async (userId, bill, daysBefore = 3) => {
     reminders.push({
       userId: new ObjectId(userId),
       billId: new ObjectId(bill._id),
-      type: "before",
+      type: 'before',
       reminderDate: today,
       sent: false,
     });
@@ -35,7 +35,7 @@ export const createBillReminders = async (userId, bill, daysBefore = 3) => {
     reminders.push({
       userId: new ObjectId(userId),
       billId: new ObjectId(bill._id),
-      type: "on",
+      type: 'on',
       reminderDate: today,
       sent: false,
     });
@@ -46,7 +46,7 @@ export const createBillReminders = async (userId, bill, daysBefore = 3) => {
     reminders.push({
       userId: new ObjectId(userId),
       billId: new ObjectId(bill._id),
-      type: "upcoming",
+      type: 'upcoming',
       reminderDate: remDate,
       sent: false,
     });
@@ -58,7 +58,7 @@ export const createBillReminders = async (userId, bill, daysBefore = 3) => {
     reminders.push({
       userId: new ObjectId(userId),
       billId: new ObjectId(bill._id),
-      type: "before",
+      type: 'before',
       reminderDate: beforeDate,
       sent: false,
     });
@@ -66,7 +66,7 @@ export const createBillReminders = async (userId, bill, daysBefore = 3) => {
     reminders.push({
       userId: new ObjectId(userId),
       billId: new ObjectId(bill._id),
-      type: "on",
+      type: 'on',
       reminderDate: onDate,
       sent: false,
     });
@@ -97,11 +97,14 @@ export const getDueRemindersForUserWithDetails = async (userId) => {
   const col = await remindersCollectionFn();
   const now = new Date();
 
-  const reminders = await col.find({
-    userId: new ObjectId(userId),
-    reminderDate: { $lte: now },
-    sent: false
-  }).sort({ reminderDate: 1 }).toArray();
+  const reminders = await col
+    .find({
+      userId: new ObjectId(userId),
+      reminderDate: { $lte: now },
+      sent: false,
+    })
+    .sort({ reminderDate: 1 })
+    .toArray();
 
   // Attach bill + utility details
   const enriched = [];
@@ -114,7 +117,7 @@ export const getDueRemindersForUserWithDetails = async (userId) => {
         _id: r._id.toString(),
         billId: r.billId.toString(),
         userId: r.userId.toString(),
-        utilityName: utility?.provider || "Unknown Utility",
+        utilityName: utility?.provider || 'Unknown Utility',
         amount: bill?.amount || 0,
       });
     } catch (err) {
@@ -136,7 +139,9 @@ export const createReminder = async (userId, billId, reminderDate, type = 'befor
     return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
   };
 
-  const remDate = reminderDate ? normalizeToMidnight(new Date(reminderDate)) : normalizeToMidnight(new Date());
+  const remDate = reminderDate
+    ? normalizeToMidnight(new Date(reminderDate))
+    : normalizeToMidnight(new Date());
   const doc = {
     userId: new ObjectId(userId),
     billId: new ObjectId(billId),
@@ -158,7 +163,10 @@ export const createReminder = async (userId, billId, reminderDate, type = 'befor
 export const getRemindersForUser = async (userId) => {
   if (!userId) throw new Error('userId required');
   const col = await remindersCollectionFn();
-  const results = await col.find({ userId: new ObjectId(userId) }).sort({ reminderDate: 1 }).toArray();
+  const results = await col
+    .find({ userId: new ObjectId(userId) })
+    .sort({ reminderDate: 1 })
+    .toArray();
 
   const enriched = [];
   for (const r of results) {
@@ -185,7 +193,7 @@ export const markManySent = async (reminderIds) => {
   const col = await remindersCollectionFn();
 
   await col.updateMany(
-    { _id: { $in: reminderIds.map(id => new ObjectId(id)) } },
+    { _id: { $in: reminderIds.map((id) => new ObjectId(id)) } },
     { $set: { sent: true, sentAt: new Date() } }
   );
 };

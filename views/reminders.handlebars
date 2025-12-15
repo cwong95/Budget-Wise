@@ -1,12 +1,12 @@
-<main class="reminders-page">
-  <section class="header-section">
-    <h1 class="page-title">Reminders</h1>
-    <p class="description">Manage your reminders — acknowledge or act on them.</p>
+<main class='reminders-page'>
+  <section class='header-section'>
+    <h1 class='page-title'>Reminders</h1>
+    <p class='description'>Manage your reminders — acknowledge or act on them.</p>
   </section>
 
   {{#if error}}
-    <section class="error-section">
-      <p class="error-message">🛑{{error}}</p>
+    <section class='error-section'>
+      <p class='error-message'>🛑{{error}}</p>
     </section>
   {{/if}}
 
@@ -14,21 +14,24 @@
 
   <h2>🔔 Due Reminders</h2>
   {{#if reminders.length}}
-    <section class="inapp-reminders">
-      <ul class="reminders-list">
+    <section class='inapp-reminders'>
+      <ul class='reminders-list'>
         {{#each reminders}}
-          <li class="reminder-item">
-            <div class="reminder-main">
-              {{#if (eq this.type "on")}}📅 Due today{{else}}⏳ Upcoming{{/if}}
-              — <strong>{{this.utilityName}}</strong> bill of ${{formatMoney this.amount}}
-              (<span class="reminder-date">{{formatDate this.reminderDate}}</span>)
+          <li class='reminder-item'>
+            <div class='reminder-main'>
+              {{#if (eq this.type 'on')}}📅 Due today{{else}}⏳ Upcoming{{/if}}
+              —
+              <strong>{{this.utilityName}}</strong>
+              bill of
+              {{formatMoney this.amount}}
+              (<span class='reminder-date'>{{formatDate this.reminderDate}}</span>)
             </div>
-            <div class="reminder-actions">
-              <form action="/reminders/{{this._id}}/ack" method="POST" style="display:inline;">
-                <button type="submit" class="btn btn-secondary">Acknowledge</button>
+            <div class='reminder-actions'>
+              <form action='/reminders/{{this._id}}/ack' method='POST' style='display:inline;'>
+                <button type='submit' class='btn btn-secondary'>Acknowledge</button>
               </form>
-              {{!-- Optionally add a link to the bill or utility --}}
-              <a href="/utilities/{{this.utilityId}}/bills" class="btn btn-link">Open bills</a>
+              {{! Optionally add a link to the bill or utility }}
+              <a href='/utilities/{{this.utilityId}}/bills' class='btn btn-link'>Open bills</a>
             </div>
           </li>
         {{/each}}

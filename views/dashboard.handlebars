@@ -1,13 +1,12 @@
-<main class="dashboard-page">
-  <section class="header-section">
-    <h1 class="page-title">BudgetWise Dashboard</h1>
-    <p class="description">Your central hub for budget tracking and bill
-      management.</p>
+<main class='dashboard-page'>
+  <section class='header-section'>
+    <h1 class='page-title'>BudgetWise Dashboard</h1>
+    <p class='description'>Your central hub for budget tracking and bill management.</p>
   </section>
 
   {{#if error}}
-    <section class="error-section">
-      <p class="error-message">🛑{{error}}</p>
+    <section class='error-section'>
+      <p class='error-message'>🛑{{error}}</p>
     </section>
   {{/if}}
 
@@ -15,33 +14,33 @@
 
   <h2>📊 Budget Tracking Summaries</h2>
   <p>Track your spending against your goals.
-    <a href="/budgets">Manage Budgets</a></p>
+    <a href='/budgets'>Manage Budgets</a></p>
 
   {{#if budgetSummaries}}
-    <section class="budget-tracking-list">
+    <section class='budget-tracking-list'>
       {{#each budgetSummaries}}
-        <div class="budget-card">
+        <div class='budget-card'>
           <h3>{{this.category}}
             Budget ({{formatDate this.startDate}}
             -
             {{formatDate this.endDate}})</h3>
 
-          <div class="tracking-stats">
+          <div class='tracking-stats'>
             <p><strong>Limit:</strong> ${{formatMoney this.amountLimit}}</p>
             <p><strong>Spent:</strong> ${{formatMoney this.amountUsed}}</p>
             <p><strong>Remaining:</strong>
               ${{formatMoney this.amountRemaining}}</p>
           </div>
 
-          <div class="progress-bar-container">
+          <div class='progress-bar-container'>
             <div
-              class="progress-bar"
-              style="width: {{this.percentageUsed}}%;"
-              title="{{this.percentageUsed}}% Used"
+              class='progress-bar'
+              style='width: {{this.percentageUsed}}%;'
+              title='{{this.percentageUsed}}% Used'
             ></div>
           </div>
 
-          <p class="percentage-used-text">
+          <p class='percentage-used-text'>
             {{this.percentageUsed}}% of budget used
           </p>
         </div>
@@ -49,72 +48,60 @@
     </section>
   {{else}}
     <p>You have no active budgets being tracked. Please
-      <a href="/budgets">set one up</a>!</p>
+      <a href='/budgets'>set one up</a>!</p>
   {{/if}}
 
   <hr />
 
   <h2>📌 Upcoming Bills & Utilities</h2>
   {{#if utilitySummary}}
-    <section class="utility-summary-card">
+    <section class='utility-summary-card'>
       <h3>Utility Bill Status Overview</h3>
-      <div class="utility-summary-stats">
-        <div class="summary-item">
-          <span class="status-badge status-paid">Paid</span>
-          <span class="summary-count">{{utilitySummary.paid}}</span>
+      <div class='utility-summary-stats'>
+        <div class='summary-item'>
+          <span class='status-badge status-paid'>Paid</span>
+          <span class='summary-count'>{{utilitySummary.paid}}</span>
         </div>
-        <div class="summary-item">
-          <span class="status-badge status-due">Due Today</span>
-          <span class="summary-count">{{utilitySummary.due}}</span>
+        <div class='summary-item'>
+          <span class='status-badge status-due'>Due Today</span>
+          <span class='summary-count'>{{utilitySummary.due}}</span>
         </div>
-        <div class="summary-item">
-          <span class="status-badge status-upcoming">Upcoming</span>
-          <span class="summary-count">{{utilitySummary.upcoming}}</span>
+        <div class='summary-item'>
+          <span class='status-badge status-upcoming'>Upcoming</span>
+          <span class='summary-count'>{{utilitySummary.upcoming}}</span>
         </div>
-        <div class="summary-item">
-          <span class="status-badge status-overdue">Overdue</span>
-          <span class="summary-count">{{utilitySummary.overdue}}</span>
+        <div class='summary-item'>
+          <span class='status-badge status-overdue'>Overdue</span>
+          <span class='summary-count'>{{utilitySummary.overdue}}</span>
         </div>
-        <div class="summary-item total">
+        <div class='summary-item total'>
           <strong>Total Bills:</strong>
           {{utilitySummary.total}}
         </div>
       </div>
 
-      <div class="utility-progress-bar">
+      <div class='utility-progress-bar'>
         <div
-          class="utility-progress-paid"
-          style="width: {{calcPercent
-            utilitySummary.paid
-            utilitySummary.total
-          }}%;"
+          class='utility-progress-paid'
+          style='width: {{calcPercent utilitySummary.paid utilitySummary.total}}%;'
         ></div>
         <div
-          class="utility-progress-due"
-          style="width: {{calcPercent
-            utilitySummary.due
-            utilitySummary.total
-          }}%;"
+          class='utility-progress-due'
+          style='width: {{calcPercent utilitySummary.due utilitySummary.total}}%;'
         ></div>
         <div
-          class="utility-progress-upcoming"
-          style="width: {{calcPercent
-            utilitySummary.upcoming
-            utilitySummary.total
-          }}%;"
+          class='utility-progress-upcoming'
+          style='width: {{calcPercent utilitySummary.upcoming utilitySummary.total}}%;'
         ></div>
         <div
-          class="utility-progress-overdue"
-          style="width: {{calcPercent
-            utilitySummary.overdue
-            utilitySummary.total
-          }}%;"
+          class='utility-progress-overdue'
+          style='width: {{calcPercent utilitySummary.overdue utilitySummary.total}}%;'
         ></div>
       </div>
 
-      <p class="utility-summary-note">
+      <p class='utility-summary-note'>
         Track and manage all your utilities in one place.
-        <a href="/utilities">Go to Utilities</a>
+        <a href='/utilities'>Go to Utilities</a>
       </p>
     </section>
   {{else}}
@@ -124,15 +111,19 @@
   <hr />
 
   <h2>🔔 Reminders</h2>
-  {{!-- Overdue bills with notes --}}
+  {{! Overdue bills with notes }}
   <h3>🔴 Overdue Bills</h3>
   {{#if overdueBills.length}}
-    <section class="overdue-bills">
+    <section class='overdue-bills'>
       <ul>
         {{#each overdueBills}}
           <li>
-            <strong>{{this.utility.provider}}</strong> — ${{formatMoney this.amount}} — Due: {{formatDate this.dueDate}}<br>
-            <em>Notes:</em> {{#if this.notes}}{{this.notes}}{{else}}—{{/if}}
+            <strong>{{this.utility.provider}}</strong>
+            — ${{formatMoney this.amount}}
+            — Due:
+            {{formatDate this.dueDate}}<br />
+            <em>Notes:</em>
+            {{#if this.notes}}{{this.notes}}{{else}}—{{/if}}
           </li>
         {{/each}}
       </ul>
@@ -141,15 +132,19 @@
     <p>No overdue bills.</p>
   {{/if}}
 
-  {{!-- Upcoming bills with notes --}}
+  {{! Upcoming bills with notes }}
   <h3>🔔 Upcoming Bills</h3>
   {{#if upcomingBills.length}}
-    <section class="upcoming-bills">
+    <section class='upcoming-bills'>
       <ul>
         {{#each upcomingBills}}
           <li>
-            <strong>{{this.utility.provider}}</strong> — ${{formatMoney this.amount}} — Due: {{formatDate this.dueDate}}<br>
-            <em>Notes:</em> {{#if this.notes}}{{this.notes}}{{else}}—{{/if}}
+            <strong>{{this.utility.provider}}</strong>
+            — ${{formatMoney this.amount}}
+            — Due:
+            {{formatDate this.dueDate}}<br />
+            <em>Notes:</em>
+            {{#if this.notes}}{{this.notes}}{{else}}—{{/if}}
           </li>
         {{/each}}
       </ul>
@@ -157,6 +152,5 @@
   {{else}}
     <p>No upcoming bills.</p>
   {{/if}}
-
 
 </main>

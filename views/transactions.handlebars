@@ -51,12 +51,21 @@
     <ul class="list-group">
         {{#each transactions}}
         <li class="list-group-item">
-            <strong>{{this.title}}</strong> - ${{this.amount}} ({{this.category}}) - {{this.type}} - {{this.date}}
+            <div class="transaction-details">
+                <div class="trans-title"><strong>{{this.title}}</strong></div>
+                <div class="trans-meta">
+                    <span class="trans-amount {{#if this.isIncome}}income{{else}}expense{{/if}}">${{formatMoney this.amount}}</span>
+                    <span class="trans-category">&nbsp;(&nbsp;{{this.category}}&nbsp;)</span>
+                    <span class="trans-type">&nbsp;-&nbsp;{{this.type}}</span>
+                    <span class="trans-date">&nbsp;-&nbsp;{{this.dateFormatted}}</span>
+                </div>
+            </div>
 
-            <a href="/transactions/edit/{{this._id}}" class="btn btn-sm btn-warning">Edit</a>
-            <form action="/transactions/delete/{{this._id}}" method="POST" style="display:inline;">
-                <button class="btn btn-sm btn-danger" type="submit">Delete</button>
-            </form>
+            <div class="transaction-actions">
+                <a href="/transactions/edit/{{this._id}}" class="btn btn-sm btn-warning">Edit</a>
+                <form action="/transactions/delete/{{this._id}}" method="POST" style="display:inline; margin:0;">
+                    <button class="btn btn-sm btn-danger" type="submit">Delete</button>
+                </form>
             </div>
         </li>
         {{/each}}
@@ -66,3 +75,4 @@
     {{/if}}
 
 </main>
+<script src="/js/transactions-form.js"></script>

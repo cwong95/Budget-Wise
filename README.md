@@ -15,26 +15,49 @@ BudgetWise is a full-stack budgeting app that lets users record expenses, organi
 
 1. Clone the repository:
 
-	```bash
-	git clone <repo-url>
-	cd Budget-Wise
-	```
+   ```bash
+   git clone <repo-url>
+   cd Budget-Wise
+   ```
 
 2. Install dependencies:
 
-	```bash
-	npm install
-	```
+   ```bash
+   npm install
+   ```
 
 3. Start the app:
 
-	```bash
-	npm start
-	# or
-	node app.js
-	```
+   ```bash
+   npm start
+   # or
+   node app.js
+   ```
 
-	The server runs by default on port `3000`. Open `http://localhost:3000` in a browser.
+   The server runs by default on port `3000`. Open `http://localhost:3000` in a browser.
+
+   **Database Seed (Demo Data)**
+
+   - A seed script is included to populate the development database with demo data (demo user, utilities, bills, transactions, reminders, and a sample budget).
+   - To run the seed script:
+
+   ```bash
+   npm run seed
+   ```
+
+   - The seed script will CLEAR the following collections before inserting demo data: `users`, `utilities`, `bills`, `transactions`, `reminders`, `budgets`. Run only against a development database.
+
+   - Demo login credentials (use these after running the seed):
+
+   ```
+   Email: demo@example.com
+   Password: password123
+   ```
+
+   Tips:
+
+   - The seed uses the app's data methods, so created utilities will auto-generate the current month's bill when a `defaultDay` is provided.
+   - If you want the seed to be idempotent or safer for non-development environments, consider creating a branch/PR to add environment checks or a `--force` flag.
 
 **Development & Contribution**
 
@@ -51,4 +74,3 @@ git push origin <branch-name>
 ```
 
 - Open a PR from your branch and request reviews. Follow project guidelines for reviews and merging.
- 
