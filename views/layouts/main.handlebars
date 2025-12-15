@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang='en'>
   <head>
     <meta charset='UTF-8' />
@@ -15,8 +16,8 @@
         <img src='/images/BudgetWiseLogo.png' alt='BudgetWise Logo' class='logo-img' />
       </div>
       <nav class='main-nav'>
-        <a href='/dashboard'>Home</a>
         {{#if user}}
+          <a href='/dashboard'>Home</a>
           <a href='/history'>History</a>
           <a href='/budgets'>Budget</a>
           <a href='/utilities'>Utilities</a>
@@ -26,6 +27,7 @@
             <button type='submit'>Log out</button>
           </form>
         {{else}}
+          <a href='/'>Home</a>
           <a href='/login'>Log in</a>
           <a href='/signup'>Sign up</a>
         {{/if}}

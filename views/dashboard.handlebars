@@ -111,9 +111,9 @@
   <hr />
 
   <h2>🔔 Reminders</h2>
-  <h3>🔴 Overdue Bills</h3>
   {{#if overdueBills.length}}
     <section class='overdue-bills'>
+      <h3>🔴 Overdue Bills</h3>
       <ul>
         {{#each overdueBills}}
           <li>
@@ -128,12 +128,15 @@
       </ul>
     </section>
   {{else}}
-    <p>No overdue bills.</p>
+    <section class='overdue-bills'>
+      <h3>🔴 Overdue Bills</h3>
+      <p>No overdue bills.</p>
+    </section>
   {{/if}}
 
-  <h3>🔔 Upcoming Bills</h3>
   {{#if upcomingBills.length}}
     <section class='upcoming-bills'>
+      <h3>🔔 Upcoming Bills</h3>
       <ul>
         {{#each upcomingBills}}
           <li>
@@ -148,7 +151,10 @@
       </ul>
     </section>
   {{else}}
-    <p>No upcoming bills.</p>
+    <section class='upcoming-bills'>
+      <h3>🔔 Upcoming Bills</h3>
+      <p>No upcoming bills.</p>
+    </section>
   {{/if}}
 
 </main>
