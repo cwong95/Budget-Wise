@@ -46,7 +46,16 @@ const validateCategory = (category, varName) => {
   return category;
 };
 
-export const createBudget = async ({ userId, category, amountLimit, startDate, endDate }) => {
+//Core Feature
+//Create a new budget document with category and date limits
+export const createBudget = async ({
+  userId,
+  category,
+  amountLimit,
+  startDate,
+  endDate,
+  active,
+}) => {
   userId = validateId(userId, 'userId');
   category = validateCategory(category, 'category');
   amountLimit = validateNonNegativeNumber(amountLimit, 'amountLimit');
@@ -65,6 +74,7 @@ export const createBudget = async ({ userId, category, amountLimit, startDate, e
     amountLimit,
     startDate: start,
     endDate: end,
+    active: active === undefined ? true : Boolean(active),
   };
 
   const insertInfo = await budgetsCollection.insertOne(newBudget);
@@ -92,8 +102,40 @@ export const getBudgetsForUser = async (userId) => {
   return budgetList.map((budget) => {
     budget._id = budget._id.toString();
     budget.userId = budget.userId.toString();
+    budget.active = budget.active ?? true;
     return budget;
   });
+};
+
+export const toggleBudgetActive = async (budgetId, userId) => {
+  budgetId = validateId(budgetId, 'budgetId');
+  userId = validateId(userId, 'userId');
+
+  const budgetsCollection = await budgets();
+
+  const budget = await budgetsCollection.findOne({ _id: new ObjectId(budgetId) });
+  if (!budget) throw new Error('Budget not found');
+
+  if (budget.userId.toString() !== userId) {
+    throw new Error('Not authorized to update this budget');
+  }
+
+  const newActiveState = !budget.active;
+
+  const updateInfo = await budgetsCollection.updateOne(
+    { _id: new ObjectId(budgetId) },
+    { $set: { active: newActiveState } }
+  );
+
+  if (updateInfo.modifiedCount === 0) {
+    throw new Error('Could not update budget status');
+  }
+
+  const updated = await budgetsCollection.findOne({ _id: new ObjectId(budgetId) });
+  updated._id = updated._id.toString();
+  updated.userId = updated.userId.toString();
+
+  return updated;
 };
 
 export const calculateBudgetSummary = async (budgetDocument) => {
@@ -128,7 +170,7 @@ export const calculateBudgetSummary = async (budgetDocument) => {
 
   const amountUsed = result.length > 0 ? result[0].totalSpent : 0;
   const amountRemaining = amountLimit - amountUsed;
-  const percentageUsed = (amountUsed / amountLimit) * 100;
+  const percentageUsed = amountLimit > 0 ? (amountUsed / amountLimit) * 100 : 0;
 
   return {
     ...budgetDocument,

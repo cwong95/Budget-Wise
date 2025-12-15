@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { budgetData } from '../data/index.js';
+import * as budgetData from '../data/budget.js';
 
 const router = Router();
 
@@ -10,7 +10,7 @@ const ensureLoggedIn = (req, res, next) => {
   next();
 };
 
-const CATEGORY_OPTIONS = ['Food', 'Housing', 'Utilities', 'Entertainment', 'Other'];
+const CATEGORY_OPTIONS = ['Food', 'Housing', 'Travel', 'Utilities', 'Entertainment', 'Other'];
 
 //GET - show list of current budgets + form to add a new one
 router.get('/', ensureLoggedIn, async (req, res) => {
@@ -20,18 +20,26 @@ router.get('/', ensureLoggedIn, async (req, res) => {
     //Fetch budgets for the user.
     const userBudgets = await budgetData.getBudgetsForUser(userId);
 
+    const formattedBudgets = userBudgets.map((b) => ({
+      ...b,
+      startDateFormatted: b.startDate ? new Date(b.startDate).toLocaleDateString('en-US') : '',
+      endDateFormatted: b.endDate ? new Date(b.endDate).toLocaleDateString('en-US') : '',
+    }));
+
     return res.render('budget', {
       title: 'Manage Budgets',
-      budgets: userBudgets,
+      budgets: formattedBudgets,
       categories: CATEGORY_OPTIONS,
-      error: null,
+      error: req.query.error || null,
+      message: req.query.message || null,
     });
   } catch (e) {
     return res.status(500).render('budget', {
       title: 'Manage Budgets',
       budgets: [],
       categories: CATEGORY_OPTIONS,
-      error: e.message,
+      error: e.message || 'Server error',
+      message: null,
     });
   }
 });
@@ -40,23 +48,45 @@ router.get('/', ensureLoggedIn, async (req, res) => {
 router.post('/', ensureLoggedIn, async (req, res) => {
   const userId = req.session.user._id;
   const { category, amountLimit, startDate, endDate } = req.body;
-  const isAjax =
-    req.xhr || (req.headers.accept && req.headers.accept.indexOf('application/json') !== -1);
+
+  const isAjax = req.xhr || (req.headers.accept && req.headers.accept.includes('application/json'));
+
+  const renderWithError = async (statusCode, errMsg) => {
+    try {
+      const userBudgets = await budgetData.getBudgetsForUser(userId);
+      const formattedBudgets = userBudgets.map((b) => ({
+        ...b,
+        startDateFormatted: b.startDate ? new Date(b.startDate).toLocaleDateString('en-US') : '',
+        endDateFormatted: b.endDate ? new Date(b.endDate).toLocaleDateString('en-US') : '',
+      }));
+
+      return res.status(statusCode).render('budget', {
+        title: 'Manage Budgets',
+        budgets: formattedBudgets,
+        categories: CATEGORY_OPTIONS,
+        error: errMsg,
+        message: null,
+      });
+    } catch {
+      return res.status(statusCode).render('budget', {
+        title: 'Manage Budgets',
+        budgets: [],
+        categories: CATEGORY_OPTIONS,
+        error: errMsg,
+        message: null,
+      });
+    }
+  };
 
   try {
     if (!category || !amountLimit || !startDate || !endDate) {
       const errMsg = 'All budget fields (category, amount, dates) are required.';
+
       if (isAjax) {
         return res.status(400).json({ success: false, error: errMsg });
       }
 
-      const userBudgets = await budgetData.getBudgetsForUser(userId);
-      return res.status(400).render('budget', {
-        title: 'Manage Budgets',
-        budgets: userBudgets,
-        categories: CATEGORY_OPTIONS,
-        error: errMsg,
-      });
+      return renderWithError(400, errMsg);
     }
 
     const newBudget = await budgetData.createBudget({
@@ -65,39 +95,34 @@ router.post('/', ensureLoggedIn, async (req, res) => {
       amountLimit: Number(amountLimit),
       startDate,
       endDate,
+      active: true,
     });
 
     if (isAjax) {
-      return res.json({ success: true, budget: newBudget });
+      return res.status(200).json({ success: true, budget: newBudget });
     }
 
-    return res.redirect('/budgets');
+    return res.redirect('/budgets?message=' + encodeURIComponent('Budget created successfully'));
   } catch (e) {
-    let userBudgets = [];
-    try {
-      userBudgets = await budgetData.getBudgetsForUser(userId);
-    } catch (innerErr) {
-      console.error('Error while fetching user budgets in error handler:', innerErr);
-    }
     const errMsg = e.message || 'Could not save the new budget.';
+
     if (isAjax) {
       return res.status(500).json({ success: false, error: errMsg });
     }
 
-    return res.status(500).render('budget', {
-      title: 'Manage Budgets',
-      budgets: userBudgets,
-      categories: CATEGORY_OPTIONS,
-      error: errMsg,
-    });
+    return renderWithError(500, errMsg);
   }
 });
 
 //POST /delete - a specific budget
 router.post('/delete', ensureLoggedIn, async (req, res) => {
-  let { budgetId } = req.body;
+  const { budgetId } = req.body;
 
   try {
+    if (!budgetId) {
+      return res.redirect('/budgets?error=' + encodeURIComponent('Missing budgetId'));
+    }
+
     const success = await budgetData.deleteBudgetById(budgetId);
 
     if (!success) {
@@ -110,6 +135,16 @@ router.post('/delete', ensureLoggedIn, async (req, res) => {
       '/budgets?error=' + encodeURIComponent(e.message || 'Failed to delete budget')
     );
   }
+});
+
+router.post('/toggle/:id', ensureLoggedIn, async (req, res) => {
+  try {
+    const { id } = req.params;
+    await budgetData.toggleBudgetActive(id, req.session.user._id);
+  } catch (err) {
+    console.error('Errror toggling budget:', err);
+  }
+  return res.redirect('/budgets');
 });
 
 export default router;

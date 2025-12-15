@@ -1,3 +1,5 @@
+// Routes for managing the transactions
+
 import { Router } from 'express';
 import transactionsData from '../data/transactions.js';
 
@@ -9,9 +11,15 @@ router.get('/', async (req, res) => {
 
     const userId = req.session.user._id;
     const transactions = await transactionsData.getAllTransactions(userId);
-    res.render('transactions', { transactions });
+
+    const formattedTransactions = transactions.map((t) => ({
+      ...t,
+      dateFormatted: t.date ? new Date(t.date).toLocaleDateString('en-US') : '',
+    }));
+
+    res.render('transactions', { transactions: formattedTransactions });
   } catch (e) {
-    res.status(500).render('transactions', { error: e });
+    res.status(500).render('transactions', { error: e.message || String(e), transactions: [] });
   }
 });
 
@@ -43,9 +51,14 @@ router.post('/', async (req, res) => {
       console.error('Error fetching transactions for user in error handler:', err);
     }
 
+    const formattedTransactions = transactions.map((t) => ({
+      ...t,
+      dateFormatted: t.date ? new Date(t.date).toLocaleDateString('en-US') : '',
+    }));
+
     res.status(400).render('transactions', {
-      error: e,
-      transactions,
+      error: e.message || String(e),
+      transactions: formattedTransactions,
     });
   }
 });
@@ -79,18 +92,8 @@ router.post('/edit/:id', async (req, res) => {
       notes,
     });
 
-    const acceptsJson = req.get('accept') && req.get('accept').includes('application/json');
-    if (acceptsJson || req.xhr) {
-      return res.json({ success: true });
-    }
-
     res.redirect('/transactions');
   } catch (e) {
-    console.error('Error updating transaction:', e);
-    const acceptsJson = req.get('accept') && req.get('accept').includes('application/json');
-    if (acceptsJson || req.xhr) {
-      return res.status(400).json({ error: String(e) });
-    }
     res.status(400).render('editTransaction', {
       error: e,
       trans: { _id: req.params.id, title, amount, category, type, date, notes },
