@@ -1,6 +1,6 @@
 // routes/dashboard.js
 import { Router } from "express";
-import { budgetData, billsData, remindersData } from "../data/index.js";
+import { budgetData, billsData, remindersData, utilitiesData } from "../data/index.js";
 
 const router = Router();
 
@@ -29,16 +29,34 @@ router.get("/", ensureLoggedIn, async (req, res) => {
       total: bills.length,
     };
 
-    // In-app reminders: due now and not yet sent
-    const dueReminders =
-      (await remindersData.getDueRemindersForUserWithDetails(userId)) || [];
+    const dueReminders = [];
+
+    // Show lists of overdue bills and upcoming bills within the next 3 days
+    const overdueBills = await billsData.getBillsHistoryForUser(userId, {
+      status: "overdue",
+    });
+
+    // Compute date window: tomorrow (inclusive) up to 3 days ahead (inclusive)
+    const now = new Date();
+    const todayMid = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startDate = new Date(todayMid);
+    startDate.setDate(startDate.getDate() + 1); // tomorrow
+    const endDate = new Date(todayMid);
+    endDate.setDate(endDate.getDate() + 4); // exclusive end (day after 3-day window)
+
+    const upcomingBills = await billsData.getBillsHistoryForUser(userId, {
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+      status: "upcoming",
+    });
 
 
     res.render("dashboard", {
       title: "BudgetWise Dashboard",
       budgetSummaries,
       utilitySummary,
-      reminders: dueReminders, // pass to template
+      overdueBills,
+      upcomingBills,
     });
   } catch (error) {
     res.status(500).render("dashboard", {
