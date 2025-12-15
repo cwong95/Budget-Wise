@@ -1,1 +1,11 @@
+# Node dependencies
+node_modules/
+
+# Logs
+npm-debug.log*
+
+# Editor/IDE
+.vscode/
+
+# Misc
 node_modules/

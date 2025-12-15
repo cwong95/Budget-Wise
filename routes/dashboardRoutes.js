@@ -1,15 +1,15 @@
 // routes/dashboard.js
-import { Router } from "express";
-import { budgetData, billsData, remindersData, utilitiesData } from "../data/index.js";
+import { Router } from 'express';
+import { budgetData, billsData } from '../data/index.js';
 
 const router = Router();
 
 const ensureLoggedIn = (req, res, next) => {
-  if (!req.session || !req.session.user) return res.redirect("/login");
+  if (!req.session || !req.session.user) return res.redirect('/login');
   next();
 };
 
-router.get("/", ensureLoggedIn, async (req, res) => {
+router.get('/', ensureLoggedIn, async (req, res) => {
   const userId = req.session.user._id;
 
   try {
@@ -20,62 +20,58 @@ router.get("/", ensureLoggedIn, async (req, res) => {
 
     //Show only active budgets
     const budgetSummaries = await Promise.all(
-        activeBudgets.map(async (budget) => {
-            const summary = await budgetData.calculateBudgetSummary(budget);
-                
-            return {
-                ...summary,
-                amountLimitFormatted: Number(summary.amountLimit || 0).toFixed(2),
-                amountUsedFormatted: Number(summary.amountUsed || 0).toFixed(2),
-                amountRemainingFormatted: Number(summary.amountRemaining || 0).toFixed(2),
-                percentageUsedRounded: Math.round(Number(summary.percentageUsed || 0))
-            };
-        })
+      activeBudgets.map(async (budget) => {
+        const summary = await budgetData.calculateBudgetSummary(budget);
+
+        return {
+          ...summary,
+          amountLimitFormatted: Number(summary.amountLimit || 0).toFixed(2),
+          amountUsedFormatted: Number(summary.amountUsed || 0).toFixed(2),
+          amountRemainingFormatted: Number(summary.amountRemaining || 0).toFixed(2),
+          percentageUsedRounded: Math.round(Number(summary.percentageUsed || 0)),
+        };
+      })
     );
     // Bills summary
     const bills = await billsData.getBillsForUser(userId);
     const utilitySummary = {
-      paid: bills.filter((b) => b.status === "paid").length,
-      due: bills.filter((b) => b.status === "due").length,
-      upcoming: bills.filter((b) => b.status === "upcoming").length,
-      overdue: bills.filter((b) => b.status === "overdue").length,
+      paid: bills.filter((b) => b.status === 'paid').length,
+      due: bills.filter((b) => b.status === 'due').length,
+      upcoming: bills.filter((b) => b.status === 'upcoming').length,
+      overdue: bills.filter((b) => b.status === 'overdue').length,
       total: bills.length,
     };
 
-    const dueReminders = [];
-
     // Show lists of overdue bills and upcoming bills within the next 3 days
     const overdueBills = await billsData.getBillsHistoryForUser(userId, {
-      status: "overdue",
+      status: 'overdue',
     });
 
-    // Compute date window: tomorrow (inclusive) up to 3 days ahead (inclusive)
     const now = new Date();
     const todayMid = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const startDate = new Date(todayMid);
-    startDate.setDate(startDate.getDate() + 1); // tomorrow
+    startDate.setDate(startDate.getDate() + 1);
     const endDate = new Date(todayMid);
-    endDate.setDate(endDate.getDate() + 4); // exclusive end (day after 3-day window)
+    endDate.setDate(endDate.getDate() + 4);
 
     const upcomingBills = await billsData.getBillsHistoryForUser(userId, {
       startDate: startDate.toISOString(),
       endDate: endDate.toISOString(),
-      status: "upcoming",
+      status: 'upcoming',
     });
 
-
-    res.render("dashboard", {
-      title: "BudgetWise Dashboard",
+    res.render('dashboard', {
+      title: 'BudgetWise Dashboard',
       budgetSummaries,
       utilitySummary,
       overdueBills,
       upcomingBills,
     });
   } catch (error) {
-    res.status(500).render("dashboard", {
-      title: "BudgetWise Dashboard",
+    res.status(500).render('dashboard', {
+      title: 'BudgetWise Dashboard',
       budgetSummaries: [],
-      error: error.message || "Unable to load dashboard data.",
+      error: error.message || 'Unable to load dashboard data.',
     });
   }
 });

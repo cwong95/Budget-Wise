@@ -1,18 +1,18 @@
-import { Router } from "express";
-import { getBillsHistoryForUser } from "../data/bills.js";
+import { Router } from 'express';
+import { getBillsHistoryForUser } from '../data/bills.js';
 
 const router = Router();
 
 const ensureLoggedIn = (req, res, next) => {
   if (!req.session.user) {
-    return res.redirect("/login");
+    return res.redirect('/login');
   }
   next();
 };
 
 const parseMonthFilter = (monthValue) => {
   if (!monthValue) return {};
-  const [yearStr, monthStr] = monthValue.split("-");
+  const [yearStr, monthStr] = monthValue.split('-');
   const year = Number.parseInt(yearStr, 10);
   const monthIndex = Number.parseInt(monthStr, 10) - 1; // JS months are 0-based.
   if (Number.isNaN(year) || Number.isNaN(monthIndex)) return {};
@@ -21,7 +21,7 @@ const parseMonthFilter = (monthValue) => {
   return { startDate, endDate };
 };
 
-router.get("/history", ensureLoggedIn, async (req, res) => {
+router.get('/history', ensureLoggedIn, async (req, res) => {
   const { month, status, search } = req.query;
 
   const { startDate, endDate } = parseMonthFilter(month);
@@ -34,24 +34,24 @@ router.get("/history", ensureLoggedIn, async (req, res) => {
       searchTerm: search,
     });
 
-    res.render("history", {
-      title: "Bill History - BudgetWise",
+    res.render('history', {
+      title: 'Bill History - BudgetWise',
       bills,
       filters: {
-        month: month || "",
-        status: status || "",
-        search: search || "",
+        month: month || '',
+        status: status || '',
+        search: search || '',
       },
     });
   } catch (error) {
-    res.status(500).render("history", {
-      title: "Bill History - BudgetWise",
-      error: error.message || "Unable to load history.",
+    res.status(500).render('history', {
+      title: 'Bill History - BudgetWise',
+      error: error.message || 'Unable to load history.',
       bills: [],
       filters: {
-        month: month || "",
-        status: status || "",
-        search: search || "",
+        month: month || '',
+        status: status || '',
+        search: search || '',
       },
     });
   }

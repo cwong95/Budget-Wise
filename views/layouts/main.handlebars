@@ -1,52 +1,45 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>BudgetWise</title>
-  <link rel="stylesheet" href="/css/main.css" />
-  <link rel="stylesheet" href="/css/home.css" />
-  <link rel="stylesheet" href="/css/dashboard-budget.css" /> 
-  <link rel="stylesheet" href="/css/utilities.css" />
-  <link rel="stylesheet" href="/css/bills-list.css">
-  <link rel="stylesheet" href="/css/transactions.css">
-</head>
-<body>
-  <header>
-    <div class="logo-placeholder">
-      {{#if user}}
-        <a href="/dashboard" aria-label="Go to Dashboard">
-          <img src="/images/BudgetWiseLogo.png" alt="BudgetWise Logo" class="logo-img" />
-        </a>
-      {{else}}
-        <a href="/" aria-label="Go to Home">
-          <img src="/images/BudgetWiseLogo.png" alt="BudgetWise Logo" class="logo-img" />
-        </a>
-      {{/if}}
-    </div>
-    <nav class="main-nav">
-      <a href="/dashboard">Home</a>
-      {{#if user}}
-        <a href="/history">History</a>
-        <a href="/budgets">Budget</a>
-        <a href="/utilities">Utilities</a>
-        <a href="/transactions">Transactions</a>
-      
-        <form method="POST" action="/logout" class="logout-form">
-          <button type="submit">Log out</button>
-        </form>
-      {{else}}
-        <a href="/login">Log in</a>
-        <a href="/signup">Sign up</a>
-      {{/if}}
-    </nav>
-  </header>
+<html lang='en'>
+  <head>
+    <meta charset='UTF-8' />
+    <title>BudgetWise</title>
+    <link rel='stylesheet' href='/css/main.css' />
+    <link rel='stylesheet' href='/css/home.css' />
+    <link rel='stylesheet' href='/css/dashboard-budget.css' />
+    <link rel='stylesheet' href='/css/utilities.css' />
+    <link rel='stylesheet' href='/css/bills-list.css' />
+    <link rel='stylesheet' href='/css/transactions.css' />
+  </head>
+  <body>
+    <header>
+      <div class='logo-placeholder'>
+        <img src='/images/BudgetWiseLogo.png' alt='BudgetWise Logo' class='logo-img' />
+      </div>
+      <nav class='main-nav'>
+        {{#if user}}
+          <a href='/dashboard'>Home</a>
+          <a href='/history'>History</a>
+          <a href='/budgets'>Budget</a>
+          <a href='/utilities'>Utilities</a>
+          <a href='/transactions'>Transactions</a>
 
-  {{{body}}}
+          <form method='POST' action='/logout' class='logout-form'>
+            <button type='submit'>Log out</button>
+          </form>
+        {{else}}
+          <a href='/'>Home</a>
+          <a href='/login'>Log in</a>
+          <a href='/signup'>Sign up</a>
+        {{/if}}
+      </nav>
+    </header>
 
-  <!-- Shared footer -->
-  <footer class="site-footer">
-    <p>&copy; 2025 BudgetWise. All rights reserved.</p>
-  </footer>
-  <script src="/js/main.js"></script>
-</body>
+    {{{body}}}
+
+    <!-- Shared footer -->
+    <footer class='site-footer'>
+      <p>&copy; 2025 BudgetWise. All rights reserved.</p>
+    </footer>
+    <script src='/js/main.js'></script>
+  </body>
 </html>

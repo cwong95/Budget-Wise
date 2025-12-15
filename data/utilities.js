@@ -1,12 +1,12 @@
-import { ObjectId } from "mongodb";
+import { ObjectId } from 'mongodb';
 import {
   utilities as utilitiesCollectionFn,
   bills as billsCollectionFn,
-} from "../config/mongoCollections.js";
-import { createBill, updateBill } from "./bills.js";
+} from '../config/mongoCollections.js';
+import { createBill, updateBill } from './bills.js';
 
 const validateString = (name, value) => {
-  if (!value || typeof value !== "string" || value.trim().length === 0) {
+  if (!value || typeof value !== 'string' || value.trim().length === 0) {
     throw new Error(`${name} must be a non-empty string`);
   }
 };
@@ -14,7 +14,7 @@ const validateString = (name, value) => {
 const validateDay = (day) => {
   const num = Number(day);
   if (!Number.isInteger(num) || num < 1 || num > 31) {
-    throw new Error("defaultDay must be an integer between 1 and 31");
+    throw new Error('defaultDay must be an integer between 1 and 31');
   }
   return num;
 };
@@ -25,12 +25,12 @@ export const createUtility = async (
   accountNumber,
   defaultDay,
   defaultAmount,
-  notes = "",
+  notes = '',
   active = true
 ) => {
-  validateString("userId", userId);
-  validateString("provider", provider);
-  validateString("accountNumber", accountNumber);
+  validateString('userId', userId);
+  validateString('provider', provider);
+  validateString('accountNumber', accountNumber);
 
   const utilitiesCollection = await utilitiesCollectionFn();
 
@@ -39,17 +39,14 @@ export const createUtility = async (
     provider: provider.trim(),
     accountNumber: accountNumber.trim(),
     defaultDay: defaultDay ? validateDay(defaultDay) : null,
-    defaultAmount:
-      typeof defaultAmount === "number"
-        ? defaultAmount
-        : Number(defaultAmount) || 0,
-    notes: notes ? String(notes).trim() : "",
+    defaultAmount: typeof defaultAmount === 'number' ? defaultAmount : Number(defaultAmount) || 0,
+    notes: notes ? String(notes).trim() : '',
     active: Boolean(active),
     createdAt: new Date(),
   };
 
   const insertResult = await utilitiesCollection.insertOne(newUtility);
-  if (!insertResult.acknowledged) throw new Error("Could not create utility");
+  if (!insertResult.acknowledged) throw new Error('Could not create utility');
 
   const created = await utilitiesCollection.findOne({
     _id: insertResult.insertedId,
@@ -61,18 +58,14 @@ export const createUtility = async (
   let autoBill = null;
   if (created.active && created.defaultDay) {
     const now = new Date();
-    const dueDate = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      created.defaultDay
-    );
+    const dueDate = new Date(now.getFullYear(), now.getMonth(), created.defaultDay);
 
     autoBill = await createBill(
       created.userId,
       created._id,
       dueDate,
       created.defaultAmount,
-      "upcoming",
+      'upcoming',
       `Auto-generated bill for ${created.provider}`
     );
   }
@@ -81,11 +74,9 @@ export const createUtility = async (
 };
 
 export const getUtilitiesForUser = async (userId) => {
-  validateString("userId", userId);
+  validateString('userId', userId);
   const utilitiesCollection = await utilitiesCollectionFn();
-  const results = await utilitiesCollection
-    .find({ userId: new ObjectId(userId) })
-    .toArray();
+  const results = await utilitiesCollection.find({ userId: new ObjectId(userId) }).toArray();
   return results.map((u) => ({
     ...u,
     _id: u._id.toString(),
@@ -94,58 +85,55 @@ export const getUtilitiesForUser = async (userId) => {
 };
 
 export const getUtilityById = async (id) => {
-  validateString("id", id);
+  validateString('id', id);
   const utilitiesCollection = await utilitiesCollectionFn();
   const util = await utilitiesCollection.findOne({ _id: new ObjectId(id) });
-  if (!util) throw new Error("Utility not found");
+  if (!util) throw new Error('Utility not found');
   util._id = util._id.toString();
   util.userId = util.userId.toString();
   return util;
 };
 
 export const updateUtility = async (id, updates = {}) => {
-  validateString("id", id);
+  validateString('id', id);
   const utilitiesCollection = await utilitiesCollectionFn();
 
   // Block edits on inactive utilities
   const existing = await utilitiesCollection.findOne({ _id: new ObjectId(id) });
-  if (!existing) throw new Error("Utility not found");
+  if (!existing) throw new Error('Utility not found');
   if (!existing.active) {
-    throw new Error("Cannot edit an inactive utility. Reactivate it first.");
+    throw new Error('Cannot edit an inactive utility. Reactivate it first.');
   }
 
   const updateDoc = {};
-  if (updates.provider !== undefined)
-    updateDoc.provider = String(updates.provider).trim();
+  if (updates.provider !== undefined) updateDoc.provider = String(updates.provider).trim();
   if (updates.accountNumber !== undefined)
     updateDoc.accountNumber = String(updates.accountNumber).trim();
   if (updates.defaultDay !== undefined) {
     updateDoc.defaultDay =
-      updates.defaultDay !== null && updates.defaultDay !== ""
+      updates.defaultDay !== null && updates.defaultDay !== ''
         ? validateDay(updates.defaultDay)
         : null;
   }
   if (updates.defaultAmount !== undefined) {
     updateDoc.defaultAmount =
-      typeof updates.defaultAmount === "number"
+      typeof updates.defaultAmount === 'number'
         ? updates.defaultAmount
         : Number(updates.defaultAmount) || 0;
   }
-  if (updates.notes !== undefined)
-    updateDoc.notes = String(updates.notes).trim();
+  if (updates.notes !== undefined) updateDoc.notes = String(updates.notes).trim();
   if (updates.active !== undefined) {
-    updateDoc.active = updates.active === "on" || updates.active === true;
+    updateDoc.active = updates.active === 'on' || updates.active === true;
   }
 
   const result = await utilitiesCollection.updateOne(
     { _id: new ObjectId(id) },
     { $set: updateDoc }
   );
-  if (result.modifiedCount === 0) throw new Error("Could not update utility");
+  if (result.modifiedCount === 0) throw new Error('Could not update utility');
 
   const updatedUtility = await getUtilityById(id);
 
-  // Sync current month’s bill if due date or amount changed
   if (updates.defaultDay !== undefined || updates.defaultAmount !== undefined) {
     const now = new Date();
     const dueDate = updates.defaultDay
@@ -154,8 +142,7 @@ export const updateUtility = async (id, updates = {}) => {
 
     const billUpdates = {};
     if (dueDate) billUpdates.dueDate = dueDate;
-    if (updates.defaultAmount !== undefined)
-      billUpdates.amount = updates.defaultAmount;
+    if (updates.defaultAmount !== undefined) billUpdates.amount = updates.defaultAmount;
 
     const billsCollection = await billsCollectionFn();
     const latestBill = await billsCollection.findOne(
@@ -167,16 +154,11 @@ export const updateUtility = async (id, updates = {}) => {
     }
   }
 
-  // If active toggled on: ensure a bill exists for current month
   if (updateDoc.active === true) {
     const billsCollection = await billsCollectionFn();
     const now = new Date();
     if (updatedUtility.defaultDay) {
-      const dueDate = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        updatedUtility.defaultDay
-      );
+      const dueDate = new Date(now.getFullYear(), now.getMonth(), updatedUtility.defaultDay);
       const existingBill = await billsCollection.findOne({
         utilityId: new ObjectId(id),
         dueDate: {
@@ -190,14 +172,13 @@ export const updateUtility = async (id, updates = {}) => {
           updatedUtility._id,
           dueDate,
           updatedUtility.defaultAmount,
-          "upcoming",
+          'upcoming',
           `Auto-generated bill for ${updatedUtility.provider}`
         );
       }
     }
   }
 
-  // If active toggled off: delete future bill for current month, keep past
   if (updateDoc.active === false) {
     const billsCollection = await billsCollectionFn();
     const now = new Date();
@@ -218,44 +199,34 @@ export const updateUtility = async (id, updates = {}) => {
       }
     }
   }
-  // Note: we intentionally no longer delete future bills when a utility is
-  // deactivated. Bills represent historical and scheduled items and should
-  // not be removed automatically on deactivation to avoid data loss.
 
   return updatedUtility;
 };
 
 export const deleteUtility = async (id) => {
-  validateString("id", id);
+  validateString('id', id);
   const utilitiesCollection = await utilitiesCollectionFn();
   const result = await utilitiesCollection.deleteOne({ _id: new ObjectId(id) });
-  if (result.deletedCount === 0) throw new Error("Could not delete utility");
+  if (result.deletedCount === 0) throw new Error('Could not delete utility');
   return true;
 };
 
 export const toggleUtilityActive = async (id) => {
-  validateString("id", id);
+  validateString('id', id);
   const utilitiesCollection = await utilitiesCollectionFn();
   const billsCollection = await billsCollectionFn();
 
   const util = await utilitiesCollection.findOne({ _id: new ObjectId(id) });
-  if (!util) throw new Error("Utility not found");
+  if (!util) throw new Error('Utility not found');
 
   const newStatus = !util.active;
-  await utilitiesCollection.updateOne(
-    { _id: new ObjectId(id) },
-    { $set: { active: newStatus } }
-  );
+  await utilitiesCollection.updateOne({ _id: new ObjectId(id) }, { $set: { active: newStatus } });
 
   const now = new Date();
 
   if (newStatus) {
     if (util.defaultDay) {
-      const dueDate = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        util.defaultDay
-      );
+      const dueDate = new Date(now.getFullYear(), now.getMonth(), util.defaultDay);
       const existingBill = await billsCollection.findOne({
         utilityId: new ObjectId(id),
         dueDate: {
@@ -269,16 +240,13 @@ export const toggleUtilityActive = async (id) => {
           util._id.toString(),
           dueDate,
           util.defaultAmount,
-          "upcoming",
+          'upcoming',
           `Auto-generated bill for ${util.provider}`
         );
       }
     }
   } else {
-    // Deactivated - delete future current-month bill; keep past
-    // Deactivated - do not delete existing or future bills. We keep bills
-    // as records of scheduled or historical charges even when a utility is
-    // marked inactive to avoid unexpected data loss.
+    throw new Error('Deactivating utilities is not supported at this time');
   }
 
   return {

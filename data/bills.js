@@ -1,25 +1,19 @@
-import { ObjectId } from "mongodb";
-import { bills as billsCollectionFn } from "../config/mongoCollections.js";
-
-const validateString = (name, value) => {
-  if (!value || typeof value !== "string" || value.trim().length === 0) {
-    throw new Error(`${name} must be a non-empty string`);
-  }
-};
+import { ObjectId } from 'mongodb';
+import { bills as billsCollectionFn } from '../config/mongoCollections.js';
 
 const computeStatusFromDates = (bill) => {
   try {
-    if (bill.status && String(bill.status).toLowerCase() === "paid") return "paid";
+    if (bill.status && String(bill.status).toLowerCase() === 'paid') return 'paid';
     const now = new Date();
     const todayMid = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    if (!bill.dueDate) return bill.status || "upcoming";
+    if (!bill.dueDate) return bill.status || 'upcoming';
     const due = new Date(bill.dueDate);
     const dueMid = new Date(due.getFullYear(), due.getMonth(), due.getDate());
-    if (dueMid.getTime() < todayMid.getTime()) return "overdue";
-    if (dueMid.getTime() === todayMid.getTime()) return "due";
-    return "upcoming";
+    if (dueMid.getTime() < todayMid.getTime()) return 'overdue';
+    if (dueMid.getTime() === todayMid.getTime()) return 'due';
+    return 'upcoming';
   } catch (e) {
-    return bill.status || "upcoming";
+    return bill.status || 'upcoming';
   }
 };
 
@@ -28,39 +22,35 @@ export const getBillsHistoryForUser = async (
   userId,
   { startDate, endDate, status, searchTerm } = {}
 ) => {
-  if (!userId) throw new Error("User id is required for history lookup.");
+  if (!userId) throw new Error('User id is required for history lookup.');
   const billsCollection = await billsCollectionFn();
 
   const matchStage = { userId: new ObjectId(userId) };
   if (startDate && endDate) {
     matchStage.dueDate = { $gte: new Date(startDate), $lt: new Date(endDate) };
   }
-  if (status && status.trim() !== "") {
-    matchStage.status = new RegExp(`^${status.trim()}$`, "i");
+  if (status && status.trim() !== '') {
+    matchStage.status = new RegExp(`^${status.trim()}$`, 'i');
   }
 
   const pipeline = [
     { $match: matchStage },
     {
       $lookup: {
-        from: "utilities",
-        localField: "utilityId",
-        foreignField: "_id",
-        as: "utility",
+        from: 'utilities',
+        localField: 'utilityId',
+        foreignField: '_id',
+        as: 'utility',
       },
     },
-    { $unwind: "$utility" },
+    { $unwind: '$utility' },
   ];
 
-  if (searchTerm && searchTerm.trim() !== "") {
-    const regex = new RegExp(searchTerm.trim(), "i");
+  if (searchTerm && searchTerm.trim() !== '') {
+    const regex = new RegExp(searchTerm.trim(), 'i');
     pipeline.push({
       $match: {
-        $or: [
-          { "utility.provider": regex },
-          { "utility.accountNumber": regex },
-          { notes: regex },
-        ],
+        $or: [{ 'utility.provider': regex }, { 'utility.accountNumber': regex }, { notes: regex }],
       },
     });
   }
@@ -87,11 +77,10 @@ export const createBill = async (
   utilityId,
   dueDate,
   amount,
-  status = "upcoming",
-  notes = ""
+  status = 'upcoming',
+  notes = ''
 ) => {
   const billsCollection = await billsCollectionFn();
-  // determine initial status based on dueDate and provided status
   const tentative = {
     dueDate,
     status,
@@ -102,14 +91,14 @@ export const createBill = async (
     userId: new ObjectId(userId),
     utilityId: new ObjectId(utilityId),
     dueDate: new Date(dueDate),
-    amount: typeof amount === "number" ? amount : Number(amount) || 0,
+    amount: typeof amount === 'number' ? amount : Number(amount) || 0,
     status: initialStatus,
     paidDate: null,
-    notes: notes ? String(notes).trim() : "",
+    notes: notes ? String(notes).trim() : '',
     createdAt: new Date(),
   };
   const insertResult = await billsCollection.insertOne(newBill);
-  if (!insertResult.acknowledged) throw new Error("Could not create bill");
+  if (!insertResult.acknowledged) throw new Error('Could not create bill');
   const created = await billsCollection.findOne({
     _id: insertResult.insertedId,
   });
@@ -122,9 +111,7 @@ export const createBill = async (
 // Read
 export const getBillsForUser = async (userId) => {
   const billsCollection = await billsCollectionFn();
-  const results = await billsCollection
-    .find({ userId: new ObjectId(userId) })
-    .toArray();
+  const results = await billsCollection.find({ userId: new ObjectId(userId) }).toArray();
   return results.map((b) => ({
     ...b,
     _id: b._id.toString(),
@@ -154,7 +141,7 @@ export const getBillsForUtility = async (userId, utilityId) => {
 export const getBillById = async (id) => {
   const billsCollection = await billsCollectionFn();
   const bill = await billsCollection.findOne({ _id: new ObjectId(id) });
-  if (!bill) throw new Error("Bill not found");
+  if (!bill) throw new Error('Bill not found');
   bill._id = bill._id.toString();
   bill.userId = bill.userId.toString();
   bill.utilityId = bill.utilityId.toString();
@@ -166,25 +153,17 @@ export const getBillById = async (id) => {
 export const updateBill = async (id, updates = {}) => {
   const billsCollection = await billsCollectionFn();
   const updateDoc = {};
-  if (updates.dueDate !== undefined)
-    updateDoc.dueDate = new Date(updates.dueDate);
+  if (updates.dueDate !== undefined) updateDoc.dueDate = new Date(updates.dueDate);
   if (updates.amount !== undefined)
     updateDoc.amount =
-      typeof updates.amount === "number"
-        ? updates.amount
-        : Number(updates.amount) || 0;
-  if (updates.status !== undefined)
-    updateDoc.status = String(updates.status).trim();
+      typeof updates.amount === 'number' ? updates.amount : Number(updates.amount) || 0;
+  if (updates.status !== undefined) updateDoc.status = String(updates.status).trim();
   if (updates.paidDate !== undefined)
     updateDoc.paidDate = updates.paidDate ? new Date(updates.paidDate) : null;
-  if (updates.notes !== undefined)
-    updateDoc.notes = String(updates.notes).trim();
+  if (updates.notes !== undefined) updateDoc.notes = String(updates.notes).trim();
 
-  const result = await billsCollection.updateOne(
-    { _id: new ObjectId(id) },
-    { $set: updateDoc }
-  );
-  if (result.modifiedCount === 0) throw new Error("Could not update bill");
+  const result = await billsCollection.updateOne({ _id: new ObjectId(id) }, { $set: updateDoc });
+  if (result.modifiedCount === 0) throw new Error('Could not update bill');
   return getBillById(id);
 };
 
@@ -192,7 +171,7 @@ export const updateBill = async (id, updates = {}) => {
 export const deleteBill = async (id) => {
   const billsCollection = await billsCollectionFn();
   const result = await billsCollection.deleteOne({ _id: new ObjectId(id) });
-  if (result.deletedCount === 0) throw new Error("Could not delete bill");
+  if (result.deletedCount === 0) throw new Error('Could not delete bill');
   return true;
 };
 
@@ -214,19 +193,11 @@ export const updateCurrentBillForUtility = async (utilityId, updates = {}) => {
 
   const updateDoc = {};
   if (updates.defaultDay)
-    updateDoc.dueDate = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      updates.defaultDay
-    );
-  if (updates.defaultAmount !== undefined)
-    updateDoc.amount = Number(updates.defaultAmount) || 0;
+    updateDoc.dueDate = new Date(now.getFullYear(), now.getMonth(), updates.defaultDay);
+  if (updates.defaultAmount !== undefined) updateDoc.amount = Number(updates.defaultAmount) || 0;
 
   if (Object.keys(updateDoc).length > 0) {
-    await billsCollection.updateOne(
-      { _id: currentBill._id },
-      { $set: updateDoc }
-    );
+    await billsCollection.updateOne({ _id: currentBill._id }, { $set: updateDoc });
   }
 
   return {

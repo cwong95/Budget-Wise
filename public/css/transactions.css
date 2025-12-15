@@ -1,11 +1,12 @@
 /* ===== Transaction Page Scoped Styles ===== */
 main.transaction-page {
   max-width: 800px;
+  /* restored original top margin */
   margin: 6rem auto 2rem auto;
   padding: 1.5rem;
   background: #ffffff;
   border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 /* Headings */
@@ -42,7 +43,7 @@ main.transaction-page .form-control {
 main.transaction-page .form-control:focus {
   outline: none;
   border-color: #2e7d32;
-  box-shadow: 0 0 0 2px rgba(46,125,50,0.15);
+  box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.15);
 }
 
 /* Buttons */
@@ -60,6 +61,42 @@ main.transaction-page .btn-sm {
   padding: 0.3rem 0.6rem;
   font-size: 0.75rem;
 }
+
+/* Button variants */
+main.transaction-page .btn-primary {
+  background: #1b5e20;
+  color: #fff;
+}
+main.transaction-page .btn-primary:hover {
+  background: #165118;
+}
+
+main.transaction-page .btn-danger {
+  background: #c62828;
+  color: #fff;
+}
+main.transaction-page .btn-danger:hover {
+  background: #9f2020;
+}
+
+main.transaction-page .btn-success {
+  background: #2e7d32;
+  color: #fff;
+}
+main.transaction-page .btn-success:hover {
+  background: #256628;
+}
+
+/* Actions container: spacing and layout for Edit/Delete */
+main.transaction-page .utility-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+/* Make form-contained buttons inherit styling and prevent unexpected form layout shifts */
+main.transaction-page .utility-actions form { margin: 0; }
+main.transaction-page .utility-actions form button { display: inline-block; }
 
 /* Transaction List */
 main.transaction-page .list-group {
@@ -79,7 +116,7 @@ main.transaction-page .list-group-item {
   transition: box-shadow 0.2s ease;
 }
 main.transaction-page .list-group-item:hover {
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 main.transaction-page .list-group-item strong {
   color: #1b5e20;
@@ -87,4 +124,233 @@ main.transaction-page .list-group-item strong {
 main.transaction-page .pull-right {
   display: flex;
   gap: 0.4rem;
+}
+
+/* New structured layout for transaction items */
+main.transaction-page .transaction-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0; /* allow truncation */
+}
+
+main.transaction-page .trans-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #103e10;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+main.transaction-page .trans-meta {
+  font-size: 0.85rem;
+  color: #444;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+main.transaction-page .trans-amount {
+  font-weight: 700;
+}
+main.transaction-page .trans-amount.income {
+  color: #2e7d32;
+}
+main.transaction-page .trans-amount.expense {
+  color: #c62828;
+}
+
+main.transaction-page .transaction-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-left: 1rem;
+}
+
+/* Button variants */
+main.transaction-page .btn-warning {
+  background: #ffb300;
+  color: #1f1f1f;
+}
+main.transaction-page .btn-warning:hover {
+  filter: brightness(0.95);
+}
+main.transaction-page .btn-danger {
+  background: #e53935;
+  color: #fff;
+}
+main.transaction-page .btn-danger:hover {
+  filter: brightness(0.95);
+}
+main.transaction-page .btn-primary {
+  background: #2e7d32;
+  color: #fff;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  main.transaction-page .list-group-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  main.transaction-page .transaction-actions {
+    justify-content: flex-end;
+  }
+}
+
+/* Edit transaction form specific styles (targets edit route forms) */
+form[action*='/transactions/edit'] {
+  max-width: 820px;
+  margin: 1.25rem auto;
+  padding: 1.25rem;
+  background: #ffffff;
+  border: 1px solid #e9f0ea;
+  border-radius: 10px;
+  box-shadow: 0 8px 22px rgba(16, 62, 16, 0.04);
+}
+
+/* Use a two-column grid on wider screens for compact layout */
+form[action*='/transactions/edit'] .form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem 1rem;
+  align-items: start;
+}
+
+/* Full-width rows (notes) */
+form[action*='/transactions/edit'] .form-grid .full {
+  grid-column: 1 / -1;
+}
+
+form[action*='/transactions/edit'] .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+form[action*='/transactions/edit'] .form-control {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.56rem 0.8rem;
+  border-radius: 6px;
+  border: 1px solid #d6e6d6;
+  transition: box-shadow 120ms ease, border-color 120ms ease;
+}
+
+form[action*='/transactions/edit'] .form-control:focus {
+  border-color: #2e7d32;
+  box-shadow: 0 0 0 4px rgba(46, 125, 50, 0.08);
+  outline: none;
+}
+
+/* Make textarea a bit taller */
+form[action*='/transactions/edit'] textarea.form-control {
+  min-height: 110px;
+  resize: vertical;
+}
+
+/* Place actions on the right; if only one button present it will align right */
+form[action*='/transactions/edit'] .actions-row {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: flex-end;
+  margin-top: 0.6rem;
+}
+
+form[action*='/transactions/edit'] .btn {
+  min-width: 120px;
+  padding: 0.55rem 0.9rem;
+}
+
+form[action*='/transactions/edit'] .btn-primary {
+  background: linear-gradient(180deg, #2e7d32, #27642a);
+  color: #fff;
+}
+
+form[action*='/transactions/edit'] .btn-secondary {
+  background: #f7fbf7;
+  color: #1b5e20;
+  border: 1px solid #e6efe6;
+}
+
+@media (max-width: 720px) {
+  form[action*='/transactions/edit'] .form-grid {
+    grid-template-columns: 1fr;
+  }
+  form[action*='/transactions/edit'] {
+    padding: 0.9rem;
+    margin: 0.8rem;
+  }
+  form[action*='/transactions/edit'] .actions-row {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+  form[action*='/transactions/edit'] .btn {
+    width: 100%;
+  }
+}
+
+/* Additional polish for edit form (works without changing template structure) */
+form[action*='/transactions/edit'] h2 {
+  margin-top: 0;
+  margin-bottom: 0.6rem;
+  font-size: 1.25rem;
+  color: #144a14;
+}
+
+form[action*='/transactions/edit'] .form-group label {
+  font-size: 0.95rem;
+  color: #2b5c2b;
+}
+
+/* Make inputs visually consistent and a bit larger */
+form[action*='/transactions/edit'] .form-control {
+  font-size: 0.95rem;
+  padding: 0.6rem 0.8rem;
+}
+
+/* Right-align the primary submit button so it looks like an action button */
+form[action*='/transactions/edit'] button[type='submit'] {
+  display: inline-block;
+  margin-left: auto;
+  background: linear-gradient(180deg, #2e7d32, #27642a);
+  color: #fff;
+  border: none;
+  padding: 0.56rem 0.9rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+form[action*='/transactions/edit'] button[type='submit']:hover {
+  filter: brightness(0.95);
+}
+
+/* If a Cancel link/button is present make it visually neutral */
+form[action*='/transactions/edit'] .btn-secondary,
+form[action*='/transactions/edit'] a.btn-secondary {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.5rem 0.85rem;
+  border-radius: 6px;
+  text-decoration: none;
+}
+
+/* Ensure textarea uses full width and matches inputs */
+form[action*='/transactions/edit'] textarea.form-control {
+  width: 100%;
+}
+
+/* Small screens: pull button into view and add spacing */
+@media (max-width: 520px) {
+  form[action*='/transactions/edit'] button[type='submit'] {
+    width: 100%;
+    margin-left: 0;
+    margin-top: 0.5rem;
+  }
+  form[action*='/transactions/edit'] .btn-secondary {
+    width: 100%;
+    margin-left: 0;
+  }
 }

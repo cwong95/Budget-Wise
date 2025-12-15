@@ -1,24 +1,23 @@
-// routes/bills.js
-import { Router } from "express";
-import dayjs from "dayjs";
-import { billsData, utilitiesData, remindersData } from "../data/index.js";
+import { Router } from 'express';
+import dayjs from 'dayjs';
+import { billsData, utilitiesData, remindersData } from '../data/index.js';
 
 const router = Router();
 
 const ensureLoggedIn = (req, res, next) => {
-  if (!req.session || !req.session.user) return res.redirect("/login");
+  if (!req.session || !req.session.user) return res.redirect('/login');
   next();
 };
 
 // List all bills for current user
-router.get("/", ensureLoggedIn, async (req, res) => {
+router.get('/', ensureLoggedIn, async (req, res) => {
   try {
     const userId = req.session.user._id;
     const bills = await billsData.getBillsForUser(userId);
-    res.render("bills/list", { title: "My Bills", bills });
+    res.render('bills/list', { title: 'My Bills', bills });
   } catch (err) {
-    res.status(500).render("bills/list", {
-      title: "My Bills",
+    res.status(500).render('bills/list', {
+      title: 'My Bills',
       bills: [],
       error: err.message,
     });
@@ -26,17 +25,17 @@ router.get("/", ensureLoggedIn, async (req, res) => {
 });
 
 // Create form
-router.get("/create", ensureLoggedIn, (req, res) => {
-  res.render("bills/form", {
-    title: "Add Bill",
-    action: "/bills",
-    method: "POST",
+router.get('/create', ensureLoggedIn, (req, res) => {
+  res.render('bills/form', {
+    title: 'Add Bill',
+    action: '/bills',
+    method: 'POST',
     bill: {},
   });
 });
 
 // Create bill manually
-router.post("/", ensureLoggedIn, async (req, res) => {
+router.post('/', ensureLoggedIn, async (req, res) => {
   try {
     const userId = req.session.user._id;
     const { utilityId, dueDate, amount, notes } = req.body;
@@ -47,11 +46,11 @@ router.post("/", ensureLoggedIn, async (req, res) => {
       if (!util) throw new Error('Utility not found');
       if (!util.active) throw new Error('Cannot add a bill to an inactive utility');
     }
-    const due = dayjs(dueDate).startOf("day");
-    const today = dayjs().startOf("day");
-    let status = "upcoming";
-    if (due.isBefore(today)) status = "overdue";
-    else if (due.isSame(today)) status = "due";
+    const due = dayjs(dueDate).startOf('day');
+    const today = dayjs().startOf('day');
+    let status = 'upcoming';
+    if (due.isBefore(today)) status = 'overdue';
+    else if (due.isSame(today)) status = 'due';
 
     const bill = await billsData.createBill(
       userId,
@@ -62,44 +61,41 @@ router.post("/", ensureLoggedIn, async (req, res) => {
       notes
     );
     await remindersData.createBillReminders(userId, bill, 3); // 3 days before + on due date
-    res.redirect("/bills");
+    res.redirect('/bills');
   } catch (err) {
-    res.status(400).render("bills/form", {
-      title: "Add Bill",
-      action: "/bills",
-      method: "POST",
+    res.status(400).render('bills/form', {
+      title: 'Add Bill',
+      action: '/bills',
+      method: 'POST',
       bill: req.body,
-      error: "⚠️ Could not create bill: " + err.message,
+      error: '⚠️ Could not create bill: ' + err.message,
     });
   }
 });
 
 // Create bill from utility (auto dueDate)
-router.post("/from-utility/:utilityId", ensureLoggedIn, async (req, res) => {
+router.post('/from-utility/:utilityId', ensureLoggedIn, async (req, res) => {
   try {
     const userId = req.session.user._id;
     const utilityId = req.params.utilityId;
     const { amount, notes, dueDate } = req.body;
 
-    // Ensure utility exists and is active
     const utility = await utilitiesData.getUtilityById(utilityId);
     if (!utility) throw new Error('Utility not found');
     if (!utility.active) throw new Error('Cannot add a bill to an inactive utility');
 
     let due;
     if (dueDate) {
-      // user provided a custom due date
-      due = dayjs(dueDate).startOf("day");
+      due = dayjs(dueDate).startOf('day');
     } else {
-      // fallback to utility defaultDay
-      if (!utility.defaultDay) throw new Error("Utility has no defaultDay");
-      due = dayjs().date(utility.defaultDay).startOf("day");
+      if (!utility.defaultDay) throw new Error('Utility has no defaultDay');
+      due = dayjs().date(utility.defaultDay).startOf('day');
     }
 
-    const today = dayjs().startOf("day");
-    let status = "upcoming";
-    if (due.isBefore(today)) status = "overdue";
-    else if (due.isSame(today)) status = "due";
+    const today = dayjs().startOf('day');
+    let status = 'upcoming';
+    if (due.isBefore(today)) status = 'overdue';
+    else if (due.isSame(today)) status = 'due';
 
     const bill = await billsData.createBill(
       userId,
@@ -114,31 +110,31 @@ router.post("/from-utility/:utilityId", ensureLoggedIn, async (req, res) => {
 
     res.redirect(`/utilities/${utilityId}/bills`);
   } catch (err) {
-    res.status(400).render("utilities", {
-      title: "Utilities",
+    res.status(400).render('utilities', {
+      title: 'Utilities',
       utilities: [],
-      error: "⚠️ Could not create bill: " + err.message,
+      error: '⚠️ Could not create bill: ' + err.message,
     });
   }
 });
 
 // Edit form
-router.get("/:id/edit", ensureLoggedIn, async (req, res) => {
+router.get('/:id/edit', ensureLoggedIn, async (req, res) => {
   try {
     const bill = await billsData.getBillById(req.params.id);
-    res.render("bills/form", {
-      title: "Edit Bill",
+    res.render('bills/form', {
+      title: 'Edit Bill',
       action: `/bills/${req.params.id}`,
-      method: "POST",
+      method: 'POST',
       bill,
     });
   } catch {
-    res.redirect("/bills");
+    res.redirect('/bills');
   }
 });
 
 // Update bill
-router.post("/:id", ensureLoggedIn, async (req, res) => {
+router.post('/:id', ensureLoggedIn, async (req, res) => {
   try {
     const updates = {
       dueDate: req.body.dueDate ? new Date(req.body.dueDate) : null,
@@ -151,18 +147,17 @@ router.post("/:id", ensureLoggedIn, async (req, res) => {
     const updatedBill = await billsData.updateBill(req.params.id, updates);
 
     try {
-      // keep reminders in sync with the updated bill due date
       await remindersData.replaceRemindersForBill(req.session.user._id, updatedBill, 3);
     } catch (remErr) {
       console.error('Failed to update reminders for bill:', remErr);
     }
 
-    res.redirect("/bills");
+    res.redirect('/bills');
   } catch (err) {
-    res.status(400).render("bills/form", {
-      title: "Edit Bill",
+    res.status(400).render('bills/form', {
+      title: 'Edit Bill',
       action: `/bills/${req.params.id}`,
-      method: "POST",
+      method: 'POST',
       bill: { ...req.body, _id: req.params.id },
       error: err.message,
     });
@@ -170,27 +165,32 @@ router.post("/:id", ensureLoggedIn, async (req, res) => {
 });
 
 // Delete bill
-router.post("/:id/delete", ensureLoggedIn, async (req, res) => {
+router.post('/:id/delete', ensureLoggedIn, async (req, res) => {
+  let bill = null;
   try {
-    // Prevent deletion of the utility's earliest-created bill
-    const bill = await billsData.getBillById(req.params.id);
+    bill = await billsData.getBillById(req.params.id);
     const earliest = await billsData.getEarliestBillForUtility(bill.utilityId);
     if (String(earliest) === String(bill._id)) {
       throw new Error('Cannot delete the initial auto-generated bill for this utility');
     }
     await billsData.deleteBill(req.params.id);
-  } catch {
-    // Ignore errors on delete
+  } catch (err) {
+    // Ignore errors on delete but keep bill if available for redirect
+    console.warn('Bill delete warning:', err?.message || err);
   }
-  res.redirect("/bills");
+  // Redirect back to the utility's bills page when possible, otherwise fall back to /bills
+  if (bill && bill.utilityId) {
+    return res.redirect(`/utilities/${bill.utilityId}/bills`);
+  }
+  return res.redirect('/bills');
 });
 
 // Mark bill as paid
-router.post("/:id/mark-paid", ensureLoggedIn, async (req, res) => {
+router.post('/:id/mark-paid', ensureLoggedIn, async (req, res) => {
   try {
     const bill = await billsData.getBillById(req.params.id);
     await billsData.updateBill(req.params.id, {
-      status: "paid",
+      status: 'paid',
       paidDate: new Date(),
     });
     try {
@@ -201,23 +201,20 @@ router.post("/:id/mark-paid", ensureLoggedIn, async (req, res) => {
     res.redirect(`/utilities/${bill.utilityId}/bills`);
   } catch (err) {
     console.error(err);
-    res.redirect("/bills");
+    res.redirect('/bills');
   }
 });
 
-// View bills for a utility
-router.get("/:id/bills", ensureLoggedIn, async (req, res) => {
+router.get('/:id/bills', ensureLoggedIn, async (req, res) => {
   try {
     const userId = req.session.user._id;
     const utilityId = req.params.id;
 
-    // ensure utility exists and get its active status for the UI
     const utility = await utilitiesData.getUtilityById(utilityId);
     const utilityActive = Boolean(utility && utility.active);
 
     let bills = await billsData.getBillsForUtility(userId, utilityId);
 
-    // determine earliest bill id for this utility so we can disable deletion of it in the UI
     const earliestBillId = await billsData.getEarliestBillForUtility(utilityId);
 
     bills = bills.map((b) => {
@@ -225,34 +222,38 @@ router.get("/:id/bills", ensureLoggedIn, async (req, res) => {
       const todayMidnight = new Date(today.setHours(0, 0, 0, 0));
       const dueMidnight = new Date(new Date(b.dueDate).setHours(0, 0, 0, 0));
 
-      let status = "upcoming";
-      if (dueMidnight < todayMidnight) status = "overdue";
-      else if (dueMidnight.getTime() === todayMidnight.getTime())
-        status = "due";
+      let status = 'upcoming';
+      if (dueMidnight < todayMidnight) status = 'overdue';
+      else if (dueMidnight.getTime() === todayMidnight.getTime()) status = 'due';
 
       return {
         ...b,
         status,
         showMarkPaid: status !== 'paid',
         dueDateFormatted: b.dueDate
-          ? new Date(b.dueDate).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
+          ? new Date(b.dueDate).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
             })
-          : "",
+          : '',
         amountFormatted: (Number(b.amount) || 0).toFixed(2),
-        // allow deletion unless this is the earliest-created bill
         canDelete: String(b._id) !== String(earliestBillId),
       };
     });
 
-    res.render('bills/list', { title: 'Bills for Utility', bills, utilityId, utilityActive, earliestBillId });
+    res.render('bills/list', {
+      title: 'Bills for Utility',
+      bills,
+      utilityId,
+      utilityActive,
+      earliestBillId,
+    });
   } catch (err) {
-    res.status(500).render("utilities", {
-      title: "Utilities",
+    res.status(500).render('utilities', {
+      title: 'Utilities',
       utilities: [],
-      error: "Error loading bills: " + err.message,
+      error: 'Error loading bills: ' + err.message,
     });
   }
 });

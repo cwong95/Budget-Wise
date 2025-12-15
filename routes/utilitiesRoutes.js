@@ -1,6 +1,5 @@
 // routes/utilities.js
 import { Router } from 'express';
-import dayjs from 'dayjs';
 import { utilitiesData, billsData, remindersData } from '../data/index.js';
 
 const router = Router();
@@ -16,10 +15,10 @@ router.get('/', ensureLoggedIn, async (req, res) => {
   try {
     let utilities = await utilitiesData.getUtilitiesForUser(userId);
 
-    utilities = utilities.map(u => ({
+    utilities = utilities.map((u) => ({
       ...u,
       defaultDayFormatted: u.defaultDay ? u.defaultDay.toString() : null,
-      defaultAmount: u.defaultAmount ? u.defaultAmount.toFixed(2) : '0.00'
+      defaultAmount: u.defaultAmount ? u.defaultAmount.toFixed(2) : '0.00',
     }));
 
     res.render('utilities', { title: 'Utilities', utilities });
@@ -27,7 +26,7 @@ router.get('/', ensureLoggedIn, async (req, res) => {
     res.status(500).render('utilities', {
       title: 'Utilities',
       utilities: [],
-      error: err.message
+      error: err.message,
     });
   }
 });
@@ -38,39 +37,36 @@ router.get('/create', ensureLoggedIn, (req, res) => {
     title: 'Add Utility',
     action: '/utilities',
     method: 'POST',
-    utility: {}
+    utility: {},
   });
 });
 
-// Create utility + initial bill
+// Create utility + auto-generate current bill if applicable
 router.post('/', ensureLoggedIn, async (req, res) => {
-  const isAjax = req.xhr || (req.headers.accept && req.headers.accept.indexOf('application/json') !== -1);
+  const isAjax =
+    req.xhr || (req.headers.accept && req.headers.accept.indexOf('application/json') !== -1);
   try {
     const userId = req.session.user._id;
     const { provider, accountNumber, defaultDay, defaultAmount } = req.body;
 
-    // Always create utilities as active by default; ignore any 'notes' provided from the add-utility UI.
     const { utility, autoBill } = await utilitiesData.createUtility(
       userId,
       provider,
       accountNumber,
       defaultDay ? parseInt(defaultDay, 10) : null,
       Number(defaultAmount),
-      "",
+      '',
       true
     );
 
-    // If an auto-generated bill was created, also create reminders for it
     if (autoBill) {
       try {
         await remindersData.createBillReminders(userId, autoBill, 3);
       } catch (remErr) {
-        // don't fail utility creation for reminder issues; log if needed
         console.error('Failed creating reminders for auto bill:', remErr);
       }
     }
 
-    // `createUtility` already auto-generates a current-month bill when appropriate.
     if (isAjax) {
       return res.json({ success: true, utility });
     }
@@ -87,7 +83,7 @@ router.post('/', ensureLoggedIn, async (req, res) => {
       action: '/utilities',
       method: 'POST',
       utility: req.body,
-      error: errMsg
+      error: errMsg,
     });
   }
 });
@@ -100,14 +96,13 @@ router.get('/:id/edit', ensureLoggedIn, async (req, res) => {
       title: 'Edit Utility',
       action: `/utilities/${req.params.id}`,
       method: 'POST',
-      utility: util
+      utility: util,
     });
   } catch {
     res.redirect('/utilities');
   }
 });
 
-// Update utility + sync current bill
 router.post('/:id', ensureLoggedIn, async (req, res) => {
   try {
     const updates = {
@@ -116,7 +111,7 @@ router.post('/:id', ensureLoggedIn, async (req, res) => {
       defaultDay: req.body.defaultDay ? parseInt(req.body.defaultDay, 10) : null,
       defaultAmount: req.body.defaultAmount ? Number(req.body.defaultAmount) : 0,
       notes: req.body.notes,
-      active: req.body.active === 'on'
+      active: req.body.active === 'on',
     };
 
     await utilitiesData.updateUtility(req.params.id, updates);
@@ -129,28 +124,24 @@ router.post('/:id', ensureLoggedIn, async (req, res) => {
       action: `/utilities/${req.params.id}`,
       method: 'POST',
       utility: { ...req.body, _id: req.params.id },
-      error: err.message
+      error: err.message,
     });
   }
 });
 
-// ===== View bills for a utility =====
 router.get('/:id/bills', ensureLoggedIn, async (req, res) => {
   try {
     const userId = req.session.user._id;
     const utilityId = req.params.id;
 
-    // load utility to determine active status for the UI
     const utility = await utilitiesData.getUtilityById(utilityId);
     const utilityActive = Boolean(utility && utility.active);
 
     let bills = await billsData.getBillsForUtility(userId, utilityId);
 
-    // determine earliest bill id so we can hide delete for it
     const earliestBillId = await billsData.getEarliestBillForUtility(utilityId);
 
-    // Add the new mapping logic here
-    bills = bills.map(b => {
+    bills = bills.map((b) => {
       let status = b.status; // keep DB status if it's "paid"
 
       if (status !== 'paid') {
@@ -171,42 +162,40 @@ router.get('/:id/bills', ensureLoggedIn, async (req, res) => {
           ? new Date(b.dueDate).toLocaleDateString('en-US', {
               year: 'numeric',
               month: 'long',
-              day: 'numeric'
+              day: 'numeric',
             })
           : '',
         amountFormatted: (Number(b.amount) || 0).toFixed(2),
-        canDelete: String(b._id) !== String(earliestBillId)
+        canDelete: String(b._id) !== String(earliestBillId),
       };
     });
-    res.render('bills/list', { title: 'Bills for Utility', bills, utilityId, utilityActive, earliestBillId });
+    res.render('bills/list', {
+      title: 'Bills for Utility',
+      bills,
+      utilityId,
+      utilityActive,
+      earliestBillId,
+    });
   } catch (err) {
     res.status(500).render('utilities', {
       title: 'Utilities',
       utilities: [],
-      error: 'Error loading bills: ' + err.message
+      error: 'Error loading bills: ' + err.message,
     });
   }
 });
 
-// Delete utility + its bills
 router.post('/:id/delete', ensureLoggedIn, async (req, res) => {
   try {
     const utilityId = req.params.id;
-
-    // delete the utility
     await utilitiesData.deleteUtility(utilityId);
-
-    // delete all bills linked to this utility
     await billsData.deleteBillsByUtilityId(utilityId);
-
   } catch (err) {
     console.error('Error deleting utility and bills:', err);
   }
   res.redirect('/utilities');
 });
 
-
-// Toggle active
 router.post('/:id/toggle', ensureLoggedIn, async (req, res) => {
   try {
     await utilitiesData.toggleUtilityActive(req.params.id);

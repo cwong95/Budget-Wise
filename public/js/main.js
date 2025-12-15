@@ -1,8 +1,4 @@
-// public/js/main.js
-// Delegated handler for `data-confirm` attributes.
-// Elements using `data-confirm="..."` will show a confirm dialog when clicked.
-// If the user cancels, the action (form submission / link navigation) is prevented.
-
+// Confirmation dialog for elements with data-confirm attribute
 document.addEventListener('click', (e) => {
   const el = e.target.closest('[data-confirm]');
   if (!el) return;
@@ -13,15 +9,11 @@ document.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
   }
-  // If confirmed, allow native action (form submit or link follow)
 });
 
-// Progressive enhancement: AJAX submit for budget creation form
 document.addEventListener('submit', async (e) => {
   const form = e.target.closest('.budget-form');
   if (!form) return;
-
-  // Only intercept if the browser supports fetch
   if (!window.fetch) return;
 
   e.preventDefault();
@@ -42,15 +34,15 @@ document.addEventListener('submit', async (e) => {
       method: form.method || 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
+        Accept: 'application/json',
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
     });
 
     const data = await resp.json().catch(() => null);
 
     if (!resp.ok) {
-      const err = (data && data.error) ? data.error : 'An error occurred while saving the budget.';
+      const err = data && data.error ? data.error : 'An error occurred while saving the budget.';
       if (messageEl) {
         messageEl.textContent = err;
         messageEl.classList.add('error');
@@ -62,7 +54,7 @@ document.addEventListener('submit', async (e) => {
 
     // success
     if (messageEl) {
-      messageEl.textContent = (data && data.success) ? 'Budget saved.' : 'Budget saved.';
+      messageEl.textContent = data && data.success ? 'Budget saved.' : 'Budget saved.';
       messageEl.classList.add('success');
     }
 
@@ -72,7 +64,6 @@ document.addEventListener('submit', async (e) => {
     // Optionally: append the new budget to the list if returned
     if (data && data.budget) {
       try {
-        // update count
         const countEl = document.getElementById('budgets-count');
         if (countEl) {
           const n = Number(countEl.textContent) || 0;
@@ -81,17 +72,19 @@ document.addEventListener('submit', async (e) => {
 
         let list = document.querySelector('.current-budgets-list');
         if (!list) {
-          // create the section and insert after the Existing Budgets heading
           const h2s = Array.from(document.querySelectorAll('h2'));
-          const targetH2 = h2s.find(h => h.textContent && h.textContent.includes('Existing Budgets')) || h2s[0];
+          const targetH2 =
+            h2s.find((h) => h.textContent && h.textContent.includes('Existing Budgets')) || h2s[0];
           const section = document.createElement('section');
           section.className = 'current-budgets-list';
-          if (targetH2 && targetH2.parentNode) targetH2.parentNode.insertBefore(section, targetH2.nextSibling);
+          if (targetH2 && targetH2.parentNode)
+            targetH2.parentNode.insertBefore(section, targetH2.nextSibling);
           list = section;
 
-          // remove the "no budgets" placeholder paragraph if present
           try {
-            const maybePara = Array.from(document.querySelectorAll('p')).find(p => /no budgets/i.test(p.textContent));
+            const maybePara = Array.from(document.querySelectorAll('p')).find((p) =>
+              /no budgets/i.test(p.textContent)
+            );
             if (maybePara && maybePara.parentNode) maybePara.parentNode.removeChild(maybePara);
           } catch (err) {
             // ignore
@@ -106,15 +99,16 @@ document.addEventListener('submit', async (e) => {
           <strong>Period:</strong> ${data.budget.startDate} to ${data.budget.endDate}</p>
           <form method="POST" action="/budgets/delete" class="delete-form">
             <input type="hidden" name="budgetId" value="${data.budget._id}">
-            <button type="submit" class="delete-button" data-confirm="Delete ${data.budget.category} budget?">Delete</button>
+            <button type="submit" class="delete-button" data-confirm="Delete ${
+              data.budget.category
+            } budget?">Delete</button>
           </form>
         `;
         list.prepend(div);
       } catch (err) {
-        // silent
+        // ignore
       }
     }
-
   } catch (err) {
     if (messageEl) {
       messageEl.textContent = 'Network error while saving the budget.';
@@ -125,7 +119,6 @@ document.addEventListener('submit', async (e) => {
   }
 });
 
-// Progressive enhancement: AJAX submit for utilities form
 document.addEventListener('submit', async (e) => {
   const form = e.target.closest('.utilities-form');
   if (!form) return;
@@ -150,15 +143,15 @@ document.addEventListener('submit', async (e) => {
       method: form.method || 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
+        Accept: 'application/json',
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
     });
 
     const data = await resp.json().catch(() => null);
 
     if (!resp.ok) {
-      const err = (data && data.error) ? data.error : 'An error occurred while creating the utility.';
+      const err = data && data.error ? data.error : 'An error occurred while creating the utility.';
       if (messageEl) {
         messageEl.textContent = err;
         messageEl.classList.add('error');
@@ -170,7 +163,7 @@ document.addEventListener('submit', async (e) => {
 
     // success
     if (messageEl) {
-      messageEl.textContent = (data && data.success) ? 'Utility saved.' : 'Utility saved.';
+      messageEl.textContent = data && data.success ? 'Utility saved.' : 'Utility saved.';
       messageEl.classList.add('success');
     }
 
@@ -180,10 +173,10 @@ document.addEventListener('submit', async (e) => {
     // append newly created utility to list if provided
     if (data && data.utility) {
       try {
-        // prefer the explicit ID if present
-        let list = document.getElementById('utilities-list') || document.querySelector('.current-utilities-list');
+        let list =
+          document.getElementById('utilities-list') ||
+          document.querySelector('.current-utilities-list');
         if (!list) {
-          // create the section and insert after the utility form / hr so it appears below the form
           const section = document.createElement('section');
           section.id = 'utilities-list';
           section.className = 'current-utilities-list';
@@ -196,19 +189,20 @@ document.addEventListener('submit', async (e) => {
             if (formSection && formSection.parentNode) {
               formSection.parentNode.insertBefore(section, formSection.nextSibling);
             } else {
-              // fallback: insert after the Add a Utility heading
               const h2s = Array.from(document.querySelectorAll('h2'));
-              const targetH2 = h2s.find(h => h.textContent && h.textContent.includes('Add a Utility')) || h2s[0];
-              if (targetH2 && targetH2.parentNode) targetH2.parentNode.insertBefore(section, targetH2.nextSibling);
+              const targetH2 =
+                h2s.find((h) => h.textContent && h.textContent.includes('Add a Utility')) || h2s[0];
+              if (targetH2 && targetH2.parentNode)
+                targetH2.parentNode.insertBefore(section, targetH2.nextSibling);
             }
           }
 
           list = section;
 
-          // remove the "No utilities yet" placeholder if present (target id if available)
           try {
             const placeholder = document.getElementById('no-utilities-placeholder');
-            if (placeholder && placeholder.parentNode) placeholder.parentNode.removeChild(placeholder);
+            if (placeholder && placeholder.parentNode)
+              placeholder.parentNode.removeChild(placeholder);
           } catch (err) {
             // ignore
           }
@@ -221,27 +215,29 @@ document.addEventListener('submit', async (e) => {
           <div class="utility-meta">
             <span><strong>Account:</strong> ${data.utility.accountNumber}</span>
             <span><strong>Default day:</strong> ${data.utility.defaultDay || '—'}</span>
-            <span><strong>Default amount:</strong> $${(Number(data.utility.defaultAmount)||0).toFixed(2)}</span>
+            <span><strong>Default amount:</strong> $${(
+              Number(data.utility.defaultAmount) || 0
+            ).toFixed(2)}</span>
             <span><strong>Notes:</strong> ${data.utility.notes || '—'}</span>
           </div>
           <div class="utility-actions">
             <a href="/utilities/${data.utility._id}/bills" class="btn btn-info">View Bills</a>
             <a href="/utilities/${data.utility._id}/edit" class="btn btn-primary">Edit</a>
             <form action="/utilities/${data.utility._id}/delete" method="post">
-              <button class="btn btn-danger" data-confirm="Delete ${data.utility.provider}?">Delete</button>
+              <button class="btn btn-danger" data-confirm="Delete ${
+                data.utility.provider
+              }?">Delete</button>
             </form>
             <form action="/utilities/${data.utility._id}/toggle" method="post">
               <button class="btn btn-warning">Deactivate</button>
             </form>
           </div>
         `;
-        // append so new utilities appear at the bottom of the list (below existing items)
         list.appendChild(div);
       } catch (err) {
-        // silent
+        // ignore
       }
     }
-
   } catch (err) {
     if (messageEl) {
       messageEl.textContent = 'Network error while creating the utility.';
@@ -252,15 +248,12 @@ document.addEventListener('submit', async (e) => {
   }
 });
 
-// Polyfill/fallback for <input type="month"> on browsers that don't support it.
 (() => {
   const test = document.createElement('input');
   test.setAttribute('type', 'month');
   const supportsMonth = test.type === 'month';
   if (supportsMonth) return;
 
-  // Convert any month inputs to text with pattern YYYY-MM and add a small
-  // client-side validator on the history filter form.
   document.addEventListener('DOMContentLoaded', () => {
     const monthInputs = document.querySelectorAll('input[type="month"]');
     monthInputs.forEach((inp) => {
